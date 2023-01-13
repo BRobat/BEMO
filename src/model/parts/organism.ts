@@ -3,6 +3,7 @@ import { Vector3 } from 'three';
 import { Brain } from '../ml/brain';
 import { Eye } from './eye';
 import { Genome } from './genome';
+import { MaxAttributes } from '../consts/maxAttributes';
 
 export class OrganismAttributes {
     public speedMultiplier: number;
@@ -78,13 +79,13 @@ export class Organism {
         this.rotation = 0;
         this.acceleration = 0.0;
 
-        this.attributes.baseEnergy = genome.words[0] * 200;
-        this.attributes.lifespan = genome.words[1] * 3000;
-        this.attributes.speedMultiplier = genome.words[2] * 2;
-        this.attributes.rotationMultiplier = genome.words[3] * 2;
-        this.attributes.eyeSight = genome.words[4] * 8;
-        this.attributes.multiplyAge = genome.words[5] * 500;
-        this.attributes.maxEnergy = genome.words[6] * 2000;
+        this.attributes.baseEnergy = genome.words[0] * MaxAttributes.BASE_ENERGY;
+        this.attributes.lifespan = genome.words[1] * MaxAttributes.LIFESPAN;
+        this.attributes.speedMultiplier = genome.words[2] * MaxAttributes.SPEED_MULTIPLIER;
+        this.attributes.rotationMultiplier = genome.words[3] * MaxAttributes.ROTATION_MULTIPLIER;
+        this.attributes.eyeSight = genome.words[4] * MaxAttributes.EYE_SIGHT;
+        this.attributes.multiplyAge = genome.words[5] * MaxAttributes.MULTIPLY_AGE;
+        this.attributes.maxEnergy = genome.words[6] * MaxAttributes.MAX_ENERGY;
 
         this.energy = this.attributes.baseEnergy;
     }
