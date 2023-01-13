@@ -1,9 +1,9 @@
 import { Vector3, Triangle } from "three";
-import { Organism } from "./organism";
-import { Obstacle } from "./obstacle";
-import { Eye } from "./eye";
+import { Organism } from "../parts/organism";
+import { Obstacle } from "../parts/obstacle";
+import { Eye } from "../parts/eye";
 import { MathFunctions } from "./math";
-import { EnergyPack } from "./energyPack";
+import { EnergyPack } from "../parts/energyPack";
 
 export class Physics {
     static whiskDetection(org: Organism, obstacles: Obstacle[], energyPacks: EnergyPack[]) {

@@ -1,8 +1,9 @@
-import { Organism } from "./organism";
-import { Obstacle } from "./obstacle";
+import { Organism } from "../parts/organism";
+import { Obstacle } from "../parts/obstacle";
 import { Physics } from "./physics";
-import { EnergyPack } from "./energyPack";
-import { Brain } from "./brain";
+import { EnergyPack } from "../parts/energyPack";
+import { Brain } from "../ml/brain";
+import { Genome } from "../parts/genome";
 
 export class Data {
     public organisms: Organism[] = [];
@@ -54,19 +55,19 @@ export class Data {
                 if (n == null) {
                     return;
                 }
-                let x = (Math.random() - 0.5) * 10 + energyPack.mesh.position.x;
-                let y = (Math.random() - 0.5) * 10 + energyPack.mesh.position.y;
+                let x = (Math.random() - 0.5) * 30 + energyPack.mesh.position.x;
+                let y = (Math.random() - 0.5) * 30 + energyPack.mesh.position.y;
                 if (x > this.mapSize) {
-                    x = this.mapSize;
+                    x -= this.mapSize;
                 }
                 if (x < -this.mapSize) {
-                    x = -this.mapSize;
+                    x += -this.mapSize;
                 }
                 if (y > this.mapSize) {
-                    y = this.mapSize;
+                    y -= this.mapSize;
                 }
                 if (y < -this.mapSize) {
-                    y = -this.mapSize;
+                    y += -this.mapSize;
                 }
                 n.mesh.position.set(x, y, 0);
                 n.activate();
@@ -82,18 +83,9 @@ export class Data {
                 if (n == null) {
                     return;
                 }
-                org.energy -= 100;
                 org.isReadytoMultiply = false;
-                const newOrganism = org.getOffspring();
-                n.isDead = false;
-                n.speedMultiplier = newOrganism.speedMultiplier;
-                n.rotationMultiplier = newOrganism.rotationMultiplier * (Math.random() - 0.5) * 0.1;
-                n.energy = 100;
-                n.lifespan = org.lifespan += (Math.random() - 0.5) * 10;
-                n.mesh.position.set(newOrganism.mesh.position.x, newOrganism.mesh.position.y, newOrganism.mesh.position.z);
-                n.brain = newOrganism.brain;
-                n.timeAlive = 0;
-                n.rotation = newOrganism.rotation;
+                const newOrganism = org.getOffspring(0.03);
+                n.copyParameters(newOrganism);
             }
         })
     }
@@ -123,12 +115,12 @@ export class Data {
 
     private initOrganisms(noOfOrganisms: number) {
         this.brains.forEach(brain => {
-            this.organisms.push(new Organism(brain, null, 0, 0, 1));
+            this.organisms.push(new Organism(brain, new Genome([Math.random(),Math.random(),Math.random(),Math.random(),Math.random(),Math.random(),Math.random()])));
         });
         for (let i = 0; i < noOfOrganisms; i++) {
             this.organisms[i].isDead = false;
             this.organisms[i].energy = 500;
-            this.organisms[i].lifespan = 1500;
+            this.organisms[i].attributes.lifespan = 1500;
             this.organisms[i].mesh.position.set(Math.random() * this.mapSize - this.mapSize / 2, Math.random() * this.mapSize - this.mapSize / 2, 0);
 
         }
@@ -152,7 +144,7 @@ export class Data {
                 this.organisms[i].brain = new Brain(8, 24, 3);
                 this.organisms[i].isDead = false;
                 this.organisms[i].energy = 290;
-                this.organisms[i].lifespan = 500;
+                this.organisms[i].attributes.lifespan = 500;
                 this.organisms[i].mesh.position.set(Math.random() * this.mapSize / 2 - this.mapSize / 4, Math.random() * this.mapSize / 2 - this.mapSize / 4, 0);
             }
         }
