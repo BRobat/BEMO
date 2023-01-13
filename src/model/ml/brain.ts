@@ -39,7 +39,7 @@ export class Brain {
         return outputValues;
     }
 
-    public randomize(evolutionMultiplier: number): void {
+    public mutate(evolutionMultiplier: number): void {
         this.hidden.forEach(neuron => {
             neuron.weights.forEach((weight, index) => {
                 neuron.weights[index] += ((Math.random() - 0.5) * evolutionMultiplier);

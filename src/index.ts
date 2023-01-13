@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { Data } from './model/Data';
-import { Obstacle } from './model/obstacle';
+import { Data } from './model/utils/data';
+import { Obstacle } from './model/parts/obstacle';
 
 
 let scene = new THREE.Scene();

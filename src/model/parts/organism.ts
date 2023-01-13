@@ -1,8 +1,19 @@
 import * as THREE from 'three';
 import { Vector3 } from 'three';
-import { Brain } from './brain';
+import { Brain } from '../ml/brain';
 import { Eye } from './eye';
-import { Gene } from './gene';
+import { Genome } from './genome';
+
+export class OrganismAttributes {
+    public speedMultiplier: number;
+    public rotationMultiplier: number;
+    public multiplyAge: number;
+    public maxEnergy: number;
+    public baseEnergy: number;
+    public eyeSight: number;
+    public brainSize: number;
+    public lifespan: number;
+}
 
 export class Organism {
 
@@ -12,45 +23,70 @@ export class Organism {
     public acceleration: number;
     private speed: THREE.Vector3;
     public brain: Brain;
-    private brainSize: number;
-    public speedMultiplier: number = 1;
-    public rotationMultiplier: number = 1;
-
+    
     public isDead: boolean = true;
     public timeAlive = 0;
-    public lifespan: number = 0;
     public energy = 0;
     private children: number = 0;
+    private genome: Genome;
 
     public isReadytoMultiply = false;
+    
+    public attributes: OrganismAttributes = new OrganismAttributes();
+
+    private material: THREE.MeshBasicMaterial;
+
 
 
     public eyes: Eye[] = [];
-    public readonly eyeSight: number = 5;
 
-    constructor(brain: Brain, genes: Gene[], energy: number, lifespan: number, speedMultiplier: number) {
+    constructor(brain: Brain, genome: Genome) {
         let geometry = new THREE.IcosahedronGeometry(0.1, 2);
-        let material = new THREE.MeshBasicMaterial({ color: 0x0088ff });
-        this.mesh = new THREE.Mesh(geometry, material);
-        this.speed = new THREE.Vector3(0.01, 0, 0);
-        this.rotation = 0;
-        this.acceleration = 0.0;
-        this.energy = energy;
-        this.lifespan = lifespan;
-        this.speedMultiplier = speedMultiplier;
 
+
+
+        this.material = new THREE.MeshBasicMaterial({ color: new THREE.Color(64, 64, 64) });
+        this.initByGenome(genome);
+
+
+
+        this.mesh = new THREE.Mesh(geometry, this.material);
         if (brain) {
             this.brain = brain;
-            this.brainSize = brain.hidden.length;
+            this.attributes.brainSize = brain.hidden.length;
         }
 
 
-        this.eyes.push(new Eye(this.mesh.position, new Vector3(this.eyeSight / 4, this.eyeSight, 0), new Vector3(-this.eyeSight / 4, this.eyeSight, 0)))
-        this.eyes.push(new Eye(this.mesh.position, new Vector3(-this.eyeSight, this.eyeSight / 2, 0), new Vector3(-this.eyeSight / 4, this.eyeSight, 0)))
-        this.eyes.push(new Eye(this.mesh.position, new Vector3(this.eyeSight, this.eyeSight / 2, 0), new Vector3(this.eyeSight / 4, this.eyeSight, 0)))
+        this.eyes.push(new Eye(this.mesh.position, new Vector3(this.attributes.eyeSight / 4, this.attributes.eyeSight, 0), new Vector3(-this.attributes.eyeSight / 4, this.attributes.eyeSight, 0)))
+        this.eyes.push(new Eye(this.mesh.position, new Vector3(-this.attributes.eyeSight, this.attributes.eyeSight / 2, 0), new Vector3(-this.attributes.eyeSight / 4, this.attributes.eyeSight, 0)))
+        this.eyes.push(new Eye(this.mesh.position, new Vector3(this.attributes.eyeSight, this.attributes.eyeSight / 2, 0), new Vector3(this.attributes.eyeSight / 4, this.attributes.eyeSight, 0)))
         // // this.eyes.push(new Eye(this.mesh.position, new Vector3(0, this.eyeSight * 0.0, 0), new Vector3(0, 0, 0)))
         // this.eyes.push(new Eye(this.mesh.position, new Vector3(-this.eyeSight, this.eyeSight / 2, 0), new Vector3(-this.eyeSight, 0, 0)))
         // this.eyes.push(new Eye(this.mesh.position, new Vector3(this.eyeSight, this.eyeSight / 2, 0), new Vector3(this.eyeSight, 0, 0)))
+    }
+
+    private initByGenome(genome: Genome): void {
+        const r = (Math.floor(genome.words[0] * 100) + Math.floor(genome.words[1] * 100))
+        const g = (Math.floor(genome.words[2] * 100) + Math.floor(genome.words[3] * 100))
+        const b = (Math.floor(genome.words[4] * 100) + Math.floor(genome.words[5] * 100))
+
+        this.material.color.set(new THREE.Color(r, g, b));
+        this.material.color.convertSRGBToLinear();
+
+        this.speed = new THREE.Vector3(0.001, 0, 0);
+        this.genome = genome;
+        this.rotation = 0;
+        this.acceleration = 0.0;
+
+        this.attributes.baseEnergy = genome.words[0] * 200;
+        this.attributes.lifespan = genome.words[1] * 3000;
+        this.attributes.speedMultiplier = genome.words[2] * 2;
+        this.attributes.rotationMultiplier = genome.words[3] * 2;
+        this.attributes.eyeSight = genome.words[4] * 8;
+        this.attributes.multiplyAge = genome.words[5] * 500;
+        this.attributes.maxEnergy = genome.words[6] * 2000;
+
+        this.energy = this.attributes.baseEnergy;
     }
 
 
@@ -90,7 +126,7 @@ export class Organism {
             return;
         }
 
-        this.energy -= this.brainSize * 0.001;
+        this.energy -= this.attributes.brainSize * 0.001;
         this.brain.inputs = [
             this.eyes[0].hitObs ? this.eyes[0].obstacleDistance : 0,
             this.eyes[0].hitEPack ? this.eyes[0].energyPackDistance : 0,
@@ -103,7 +139,7 @@ export class Organism {
             // this.eyes[4].hitObs ? this.eyes[2].obstacleDistance : 0,
             // this.eyes[4].hitEPack ? this.eyes[2].energyPackDistance : 0,
             this.acceleration,
-            this.energy / 1000]
+            this.energy / this.attributes.maxEnergy]
         const output = this.brain.calculate()
         if (output[0] > 0.5) {
             this.rotateRight(output[0]);
@@ -117,7 +153,7 @@ export class Organism {
 
     }
     public update(): void {
-        if (this.timeAlive > this.lifespan || this.energy <= 0) {
+        if (this.timeAlive > this.attributes.lifespan || this.energy <= 0) {
             if (this.energy <= 0) {
                 this.kill('died of starvation at age: ' + this.timeAlive + ' making: ' + this.children + ' offspring' + ' with energy:' + this.energy)
             }
@@ -137,33 +173,36 @@ export class Organism {
     }
 
     public rotateLeft(value: number) {
-        this.rotation -= 0.05 * value * this.rotationMultiplier;
+        this.rotation -= 0.05 * value * this.attributes.rotationMultiplier;
         this.acceleration = 0;
     }
 
     public rotateRight(value: number) {
-        this.rotation += 0.05 * value * this.rotationMultiplier;
+        this.rotation += 0.05 * value * this.attributes.rotationMultiplier;
         this.acceleration = 0;
     }
 
     public accelerate(value: number) {
-        this.acceleration += 0.0001 * this.speedMultiplier * value;
+        this.acceleration += 0.0001 * this.attributes.speedMultiplier * value;
         this.energy -= this.acceleration * 15;
     }
 
     private updateMultiplyingRediness() {
-        if (this.energy > 300 && this.timeAlive > 300 && Math.random() > 0.99) {
+        if (this.energy > this.attributes.baseEnergy * 3 && this.timeAlive > this.attributes.multiplyAge && Math.random() > 0.99) {
             this.isReadytoMultiply = true;
         } else {
             this.isReadytoMultiply = false;
         }
     }
 
-    public getOffspring(): Organism {
+    public getOffspring(mutateFactor: number): Organism {
         this.children++;
+        this.energy -= this.attributes.baseEnergy;
         const newBrain = this.brain.copy()
-        newBrain.randomize(0.01);
-        const newOrganism = new Organism(newBrain, null, 0, 0, this.speedMultiplier + (Math.random() * 0.5 + 0.5) * 0.1);
+        const newGenes = this.genome.copy()
+        newBrain.mutate(mutateFactor);
+        newGenes.mutate(mutateFactor);
+        const newOrganism = new Organism(newBrain, newGenes);
         newOrganism.mesh.position.set(this.mesh.position.x, this.mesh.position.y, this.mesh.position.z);
         newOrganism.mesh.rotation.set(this.mesh.rotation.x, this.mesh.rotation.y, this.mesh.rotation.z);
         newOrganism.rotation = this.rotation;
@@ -177,15 +216,27 @@ export class Organism {
         }
         console.log(text);
         this.isDead = true;
-        this.mesh.position.set(100, 100, 0);
+        this.mesh.position.set(1000, 1000, 0);
     }
 
     public addEnergy(energy: number) {
 
         this.energy += energy;
-        if (this.energy > 1000) {
-            this.energy = 1000;
+        if (this.energy > this.attributes.maxEnergy) {
+            this.energy = this.attributes.maxEnergy;
         }
 
+    }
+
+    public copyParameters(org: Organism): void {
+        this.rotation = org.rotation;
+        this.brain = org.brain;
+        this.initByGenome(org.genome);
+        this.timeAlive = 0;
+        this.isDead = false;
+        this.children = 0;
+        this.isReadytoMultiply = false;
+        this.mesh.position.set(org.mesh.position.x, org.mesh.position.y, org.mesh.position.z);
+        this.mesh.rotation.set(Math.random() * Math.PI * 2, Math.random() * Math.PI * 2, org.mesh.rotation.z);
     }
 }
