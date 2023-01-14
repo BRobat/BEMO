@@ -3,7 +3,7 @@
     "allowSyntheticDefaultImports": true,
     "noImplicitAny": true,
     "module": "es6",
-    "moduleResolution":"node",
+    "moduleResolution": "node",
     "target": "es2020",
     "allowJs": true
   },

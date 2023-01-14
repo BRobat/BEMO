@@ -1,6 +1,5 @@
-import * as THREE from 'three';
+import * as THREE from "three";
 
 export class Entity {
-    public mesh: THREE.Mesh;
-    
+  public mesh: THREE.Mesh;
 }

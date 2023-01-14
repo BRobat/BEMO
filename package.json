@@ -9,7 +9,9 @@
     "build:dev": "webpack --mode=development",
     "build:prod": "webpack --mode=production --node-env=production",
     "watch": "webpack --watch",
-    "serve": "webpack serve"
+    "serve": "webpack serve",
+    "prepare": "husky install",
+    "prettier": "prettier --write ."
   },
   "keywords": [
     "Organism",
@@ -27,8 +29,9 @@
     "css-loader": "^6.7.3",
     "declaration-bundler-webpack-plugin": "^1.0.3",
     "html-webpack-plugin": "^5.5.0",
+    "husky": "^8.0.0",
     "mini-css-extract-plugin": "^2.7.2",
-    "prettier": "^2.8.1",
+    "prettier": "^2.8.3",
     "sass": "^1.56.2",
     "sass-loader": "^13.2.0",
     "style-loader": "^3.3.1",
