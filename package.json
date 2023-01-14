@@ -9,15 +9,9 @@
     "build:dev": "webpack --mode=development",
     "build:prod": "webpack --mode=production --node-env=production",
     "watch": "webpack --watch",
-    "husky": {
-      "hooks": {
-        "applypatch-msg": "echo \"[Husky] applypatch-msg\"",
-        "pre-applypatch": "echo \"[Husky] pre-applypatch\"",
-        "post-applypatch": "echo \"[Husky] post-applypatch\"",
-        "pre-commit": "prettier --write . && git add -A ."
-      }
-    },
-    "serve": "webpack serve"
+    "serve": "webpack serve",
+    "prepare": "husky install",
+    "prettier": "prettier --write ."
   },
   "keywords": [
     "Organism",
@@ -35,6 +29,7 @@
     "css-loader": "^6.7.3",
     "declaration-bundler-webpack-plugin": "^1.0.3",
     "html-webpack-plugin": "^5.5.0",
+    "husky": "^8.0.0",
     "mini-css-extract-plugin": "^2.7.2",
     "prettier": "^2.8.3",
     "sass": "^1.56.2",
@@ -48,7 +43,6 @@
     "wepack-cli": "^0.0.1-security"
   },
   "dependencies": {
-    "husky": "^8.0.3",
     "three": "^0.148.0"
   }
 }

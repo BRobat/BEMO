@@ -8,8 +8,8 @@ npm run build
 
 to bundle this app
 
-
 ## TODO
+
 - add hash grid
 - configure linter and prettier
 - make organisms generate energy packs on death
