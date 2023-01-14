@@ -9,15 +9,15 @@
     "build:dev": "webpack --mode=development",
     "build:prod": "webpack --mode=production --node-env=production",
     "watch": "webpack --watch",
+    "husky": {
+      "hooks": {
+        "applypatch-msg": "echo \"[Husky] applypatch-msg\"",
+        "pre-applypatch": "echo \"[Husky] pre-applypatch\"",
+        "post-applypatch": "echo \"[Husky] post-applypatch\"",
+        "pre-commit": "prettier --write . && git add -A ."
+      }
+    },
     "serve": "webpack serve"
-  },
-  "husky": {
-    "hooks": {
-      "applypatch-msg": "echo \"[Husky] applypatch-msg\"",
-      "pre-applypatch": "echo \"[Husky] pre-applypatch\"",
-      "post-applypatch": "echo \"[Husky] post-applypatch\"",
-      "pre-commit": "prettier --write . && git add -A ."
-    }
   },
   "keywords": [
     "Organism",
