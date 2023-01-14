@@ -11,6 +11,14 @@
     "watch": "webpack --watch",
     "serve": "webpack serve"
   },
+  "husky": {
+    "hooks": {
+      "applypatch-msg": "echo \"[Husky] applypatch-msg\"",
+      "pre-applypatch": "echo \"[Husky] pre-applypatch\"",
+      "post-applypatch": "echo \"[Husky] post-applypatch\"",
+      "pre-commit": "prettier --write . && git add -A ."
+    }
+  },
   "keywords": [
     "Organism",
     "brain"
@@ -28,7 +36,7 @@
     "declaration-bundler-webpack-plugin": "^1.0.3",
     "html-webpack-plugin": "^5.5.0",
     "mini-css-extract-plugin": "^2.7.2",
-    "prettier": "^2.8.1",
+    "prettier": "^2.8.3",
     "sass": "^1.56.2",
     "sass-loader": "^13.2.0",
     "style-loader": "^3.3.1",
@@ -40,6 +48,7 @@
     "wepack-cli": "^0.0.1-security"
   },
   "dependencies": {
+    "husky": "^8.0.3",
     "three": "^0.148.0"
   }
 }
