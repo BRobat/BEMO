@@ -4,6 +4,7 @@ import { Brain } from '../ml/brain';
 import { Eye } from './eye';
 import { Genome } from './genome';
 import { MaxAttributes } from '../consts/maxAttributes';
+import { Entity } from './entity';
 
 export class OrganismAttributes {
     public speedMultiplier: number;
@@ -16,15 +17,14 @@ export class OrganismAttributes {
     public lifespan: number;
 }
 
-export class Organism {
+export class Organism extends Entity {
 
-    public mesh: THREE.Mesh;
 
     public rotation: number;
     public acceleration: number;
     private speed: THREE.Vector3;
     public brain: Brain;
-    
+
     public isDead: boolean = true;
     public timeAlive = 0;
     public energy = 0;
@@ -32,7 +32,7 @@ export class Organism {
     private genome: Genome;
 
     public isReadytoMultiply = false;
-    
+
     public attributes: OrganismAttributes = new OrganismAttributes();
 
     private material: THREE.MeshBasicMaterial;
@@ -42,6 +42,7 @@ export class Organism {
     public eyes: Eye[] = [];
 
     constructor(brain: Brain, genome: Genome) {
+        super();
         let geometry = new THREE.IcosahedronGeometry(0.1, 2);
 
 
@@ -129,18 +130,14 @@ export class Organism {
 
         this.energy -= this.attributes.brainSize * 0.001;
         this.brain.inputs = [
-            this.eyes[0].hitObs ? this.eyes[0].obstacleDistance : 0,
-            this.eyes[0].hitEPack ? this.eyes[0].energyPackDistance : 0,
-            this.eyes[1].hitObs ? this.eyes[1].obstacleDistance : 0,
-            this.eyes[1].hitEPack ? this.eyes[1].energyPackDistance : 0,
-            this.eyes[2].hitObs ? this.eyes[2].obstacleDistance : 0,
-            this.eyes[2].hitEPack ? this.eyes[2].energyPackDistance : 0,
-            // this.eyes[3].hitObs ? this.eyes[2].obstacleDistance : 0,
-            // this.eyes[3].hitEPack ? this.eyes[2].energyPackDistance : 0,
-            // this.eyes[4].hitObs ? this.eyes[2].obstacleDistance : 0,
-            // this.eyes[4].hitEPack ? this.eyes[2].energyPackDistance : 0,
+            this.eyes[0].hitEPack ? 1 - (this.eyes[0].energyPackDistance / this.attributes.eyeSight / 5) : 0,
+            this.eyes[1].hitEPack ? 1 - (this.eyes[1].energyPackDistance / this.attributes.eyeSight / 5) : 0,
+            this.eyes[2].hitEPack ? 1 - (this.eyes[2].energyPackDistance / this.attributes.eyeSight / 5) : 0,
+            // this.eyes[0].hitEPack ? this.eyes[0].energyPackDistance : 0,
+            // this.eyes[1].hitEPack ? this.eyes[1].energyPackDistance : 0,
+            // this.eyes[2].hitEPack ? this.eyes[2].energyPackDistance : 0,
             this.acceleration,
-            this.energy / this.attributes.maxEnergy]
+            this.energy / this.attributes.maxEnergy / 2]
         const output = this.brain.calculate()
         if (output[0] > 0.5) {
             this.rotateRight(output[0]);

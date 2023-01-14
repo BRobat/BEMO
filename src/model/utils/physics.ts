@@ -1,87 +1,82 @@
 import { Vector3, Triangle } from "three";
 import { Organism } from "../parts/organism";
 import { Obstacle } from "../parts/obstacle";
+import { Entity } from "../parts/entity";
 import { Eye } from "../parts/eye";
 import { MathFunctions } from "./math";
 import { EnergyPack } from "../parts/energyPack";
+import { HashUtils } from "./hashUtils";
 
 export class Physics {
-    static whiskDetection(org: Organism, obstacles: Obstacle[], energyPacks: EnergyPack[]) {
-        if (org.isDead) { 
+
+    static collideEntities(es: Entity[], hashList: Map<string, number[]>, hashThreshold: number) {
+        if (!es || es.length === 0) {
             return;
         }
-        org.eyes.forEach(eye => {
-            let hitObstacle = false;
-            let obstacleDistance = 0;
-            let hitEnergyPack = false;
-            let energyPackDistance = 10000;
+        es.forEach((e1: Entity, j) => {
+            if (!(e1 instanceof Organism) || e1.isDead) {
+                return;
+            };
+            const eHash = HashUtils.getEntityHash(e1, hashThreshold)
+            const allHashes = HashUtils.getNearHashes(eHash).concat([eHash]);
+            let indexes: number[] = [];
+            let toDestroyIndexes = []
+            allHashes.forEach((hashKey: string) => {
+                const hash = hashList.get(hashKey);
+                if (hash && hash.length !== 0) {
+                    indexes = indexes.concat(hash);
+                }
+            })
+            indexes = [...new Set(indexes)]
+            e1.eyes.forEach(eye => {
+                let hitEnergyPack = false;
+                let energyPackDistance = 10000;
+                indexes.forEach((i: number) => {
+                    if (es[i] instanceof Organism) {
+                        return;
+                    } else if (es[i] instanceof EnergyPack) {
 
-            obstacles.forEach(obstacle => {
-                if (eye.direction1.clone().applyAxisAngle(new Vector3(0, 0, 1), -org.rotation).add(eye.mesh.position).distanceTo(obstacle.mesh.position) <= obstacle.size) {
-                    hitObstacle = true;
-                    const newDistance = org.mesh.position.distanceTo(obstacle.mesh.position);
-                    if (newDistance > obstacleDistance) {
-                        obstacleDistance = newDistance;
+                        const ePack = es[i] as EnergyPack;
+                        const visionTriangle = new Triangle(eye.direction2.clone().applyAxisAngle(new Vector3(0, 0, 1), -e1.rotation).add(e1.mesh.position),
+                            e1.mesh.position,
+                            eye.direction1.clone().applyAxisAngle(new Vector3(0, 0, 1), -e1.rotation).add(e1.mesh.position));
+                        if (visionTriangle.containsPoint(ePack.mesh.position)) {
+                            hitEnergyPack = true;
+                            const newDistance = e1.mesh.position.distanceTo(ePack.mesh.position);
+                            if (newDistance < energyPackDistance) {
+                                energyPackDistance = newDistance;
+                            }
+                        }
+                        if (hitEnergyPack) {
+                            eye.hitEnergyPack(energyPackDistance);
+                        } else {
+                            eye.unhitEnergyPack();
+                        }
+                    }
+                });
+            })
+            indexes.forEach((i: number) => {
+                if (Physics.collisionDetection(e1, es[i])) {
+
+                    if (es[i] instanceof Organism) {
+                        const org = es[i] as Organism;
+                        // e.touch
+                    } else {
+                        const energy = es[i] as EnergyPack;
+                        e1.addEnergy(energy.energy)
+                        energy.deactivate();
                     }
                 }
-            });
-            energyPacks.forEach(energyPack => {
-                const visionTriangle = new Triangle(eye.direction2.clone().applyAxisAngle(new Vector3(0, 0, 1), -org.rotation).add(org.mesh.position),
-                    org.mesh.position,
-                    eye.direction1.clone().applyAxisAngle(new Vector3(0, 0, 1), -org.rotation).add(org.mesh.position));
-
-                if (visionTriangle.containsPoint(energyPack.mesh.position)) {
-                    hitEnergyPack = true;
-                    const newDistance = org.mesh.position.distanceTo(energyPack.mesh.position);
-                    if (newDistance < energyPackDistance) {
-                        energyPackDistance = newDistance;
-                    }
-                }
-
-                if (hitObstacle) {
-                    eye.hitObstacle(obstacleDistance);
-                } else {
-                    eye.unhitObstacle();
-                }
-                if (hitEnergyPack) {
-                    eye.hitEnergyPack(energyPackDistance);
-                } else {
-                    eye.unhitEnergyPack();
-                }
-            });
+            })
         });
     }
 
-    // static organismDetection(org1: Organism, orgs: Organism[]):  number{
-    //     orgs.forEach((org2: Organism) => {
-    //         if  (org2.mesh.position.distanceTo(org1.mesh.position) <= org1.eyeSight) {
-    //             org1.eyes.forEach((eye: Eye) => {
 
-    //             })
-    //         }
-    //     })
-    // }
-
-    static collisionDetection(org: Organism, obstacles: Obstacle[]) {
-        if (org.isDead) {
-            return;
+    static collisionDetection(e1: Entity, es: Entity) {
+        if (e1.mesh.position.distanceTo(es.mesh.position) <= 0.3) {
+            return true;
+        } else {
+            return false;
         }
-        obstacles.forEach(obstacle => {
-            if (org.mesh.position.distanceTo(obstacle.mesh.position) <= obstacle.size + 0.1) {
-                org.energy -= 0.1;
-            }
-        });
-    }
-
-    static collisionDetection2(org1: Organism, energyPack: EnergyPack[]) {
-        if (org1.isDead) {
-            return;
-        }
-        energyPack.forEach(energy => {
-            if (org1.mesh.position.distanceTo(energy.mesh.position) <= 0.3) {
-                org1.addEnergy(energy.energy)
-                energy.deactivate();
-            }
-        });
     }
 }

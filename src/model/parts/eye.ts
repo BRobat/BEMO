@@ -5,13 +5,11 @@ export class Eye {
     public position: Vector3;
     public direction1: Vector3;
     public direction2: Vector3;
-    public hitObs = false;
-    public obstacleDistance = 0;
     public hitEPack = false;
     public energyPackDistance = 0;
 
-    hitMaterial: THREE.MeshBasicMaterial = new THREE.MeshBasicMaterial({ color: 0x00aa22, opacity: 0.0  , transparent: true });
-    unhitMaterial: THREE.MeshBasicMaterial = new THREE.MeshBasicMaterial({ color: 0x00aa00, opacity: 0.0  , transparent: true });
+    hitMaterial: THREE.MeshBasicMaterial = new THREE.MeshBasicMaterial({ color: 0x00aa22, opacity: 0.01, transparent: true });
+    unhitMaterial: THREE.MeshBasicMaterial = new THREE.MeshBasicMaterial({ color: 0x00aa00, opacity: 0.0, transparent: true });
     deadMaterial: THREE.MeshBasicMaterial = new THREE.MeshBasicMaterial({ color: 0x00aa22, opacity: 0.0, transparent: true });
 
     public mesh: THREE.Mesh;
@@ -31,16 +29,6 @@ export class Eye {
         this.mesh = new THREE.Mesh(geometry, this.unhitMaterial);
     }
 
-    public hitObstacle(distance: number) {
-        this.hitObs = true;
-        this.obstacleDistance = distance;
-    }
-
-    public unhitObstacle() {
-        this.hitObs = false;
-        this.obstacleDistance = 0;
-    }
-
     public hitEnergyPack(distance: number) {
         this.hitEPack = true;
         this.energyPackDistance = distance;
@@ -53,7 +41,6 @@ export class Eye {
     }
 
     public unhit() {
-        this.hitObs = false;
         this.hitEPack = false;
         // this.mesh.material = this.unhitMaterial;
     }
