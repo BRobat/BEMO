@@ -16,7 +16,7 @@ export class Data {
   public brains: Brain[] = [];
   public bestScore: number = 0;
 
-  public batchSize: number = 1000;
+  public batchSize: number = 2000;
 
   public aliveOrganisms: number = 0;
 
@@ -67,7 +67,7 @@ export class Data {
       return;
     }
     n.mesh.position.set(position.x, position.y, 0);
-    n.energy = energy + 10;
+    n.energy = energy - 5;
     n.activate();
   }
 
@@ -110,7 +110,7 @@ export class Data {
           return;
         }
         org.isReadytoMultiply = false;
-        const newOrganism = org.getOffspring(0.03);
+        const newOrganism = org.getOffspring(0.1);
         n.copyParameters(newOrganism);
       }
     });
@@ -126,7 +126,7 @@ export class Data {
 
   private initBrains() {
     for (let i = 0; i < this.batchSize; i++) {
-      this.brains.push(new Brain(5, 15, 3));
+      this.brains.push(new Brain(11, 44, 4));
     }
   }
 
@@ -156,7 +156,18 @@ export class Data {
     this.brains.forEach((brain) => {
       const newOrganism = new Organism(
         brain,
+        // new Genome([
+        //   0.4 + Math.random()/ 3,
+        //   0.4 + Math.random()/ 3,
+        //   0.4 + Math.random()/ 3,
+        //   0.4 + Math.random()/ 3,
+        //   0.4 + Math.random()/ 3,
+        //   0.4 + Math.random()/ 3,
+        //   0.4 + Math.random()/ 3,
+        //   0.6 - Math.random()/ 3,
+        // ])
         new Genome([
+          Math.random(),
           Math.random(),
           Math.random(),
           Math.random(),
@@ -194,7 +205,7 @@ export class Data {
     if (this.aliveOrganisms <= this.batchSize / 10) {
       const i = Math.floor(Math.random() * this.batchSize);
       if (this.organisms[i].isDead) {
-        this.organisms[i].brain = new Brain(5, 15, 3);
+        this.organisms[i].brain = new Brain(11, 44, 4);
         this.organisms[i].isDead = false;
         this.organisms[i].energy = 290;
         this.organisms[i].attributes.lifespan = 500;

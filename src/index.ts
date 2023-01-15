@@ -31,7 +31,7 @@ document.body.appendChild(element);
 
 let cube = new THREE.Mesh(
   new THREE.BoxGeometry(mapSize, mapSize, 1),
-  new THREE.MeshBasicMaterial({ color: 0x222222 })
+  new THREE.MeshBasicMaterial({ color: 0x111111 })
 );
 cube.position.set(0, 0, -1);
 
@@ -110,22 +110,22 @@ function animate() {
 addEventListener("keydown", (event) => {
   switch (event.key) {
     case "ArrowLeft":
-      camera.position.x -= 1;
+      camera.position.x -= 5;
       break;
     case "ArrowRight":
-      camera.position.x += 1;
+      camera.position.x += 5;
       break;
     case "ArrowUp":
-      camera.position.y += 1;
+      camera.position.y += 5;
       break;
     case "ArrowDown":
-      camera.position.y -= 1;
+      camera.position.y -= 5;
       break;
     case "a":
-      camera.position.z += 1;
+      camera.position.z += 10;
       break;
     case "z":
-      camera.position.z -= 1;
+      camera.position.z -= 10;
       break;
   }
 });

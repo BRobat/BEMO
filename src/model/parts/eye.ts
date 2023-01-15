@@ -7,6 +7,9 @@ export class Eye {
   public direction2: Vector3;
   public hitEPack = false;
   public energyPackDistance = 0;
+  public organismHit = false;
+  public OrganismDistance = 0;
+  public genomeDistance = 0;
 
   hitMaterial: THREE.MeshBasicMaterial = new THREE.MeshBasicMaterial({
     color: 0x00aa22,
@@ -49,6 +52,18 @@ export class Eye {
 
   public unhitEnergyPack() {
     this.hitEPack = false;
+    this.mesh.material = this.unhitMaterial;
+  }
+
+  public hitOrganism(distance: number, genomeDistance: number) {
+    this.organismHit = true;
+    this.OrganismDistance = distance;
+    this.genomeDistance = genomeDistance;
+    this.mesh.material = this.hitMaterial;
+  }
+
+  public unhitOrganism() {
+    this.organismHit = false;
     this.mesh.material = this.unhitMaterial;
   }
 
