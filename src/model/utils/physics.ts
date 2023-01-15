@@ -33,70 +33,29 @@ export class Physics {
       });
       indexes = [...new Set(indexes)];
       e1.eyes.forEach((eye) => {
-        let hitOrganism = false;
-        let organismDistance = 10000;
-        let hitEnergyPack = false;
-        let energyPackDistance = 10000;
+        let hit = false;
+        let distance = e1.attributes.eyeSight;
+        let target: Entity;
         indexes.forEach((i: number) => {
-          if (es[i] instanceof Organism) {
-            const org = es[i] as Organism;
-            const visionTriangle = new Triangle(
-              eye.direction2
-                .clone()
-                .applyAxisAngle(new Vector3(0, 0, 1), -e1.rotation)
-                .add(e1.mesh.position),
-              e1.mesh.position,
-              eye.direction1
-                .clone()
-                .applyAxisAngle(new Vector3(0, 0, 1), -e1.rotation)
-                .add(e1.mesh.position)
-            );
-            if (visionTriangle.containsPoint(org.mesh.position)) {
-              hitOrganism = true;
-              const newDistance = e1.mesh.position.distanceTo(
-                org.mesh.position
-              );
-              if (newDistance < organismDistance) {
-                organismDistance = newDistance;
-              }
-            }
-            if (hitOrganism) {
-              eye.hitOrganism(
-                organismDistance,
-                e1.genome.getUnSimilarityTo(org.genome)
-              );
-            } else {
-              eye.unhitOrganism();
-            }
-          } else if (es[i] instanceof EnergyPack) {
-            const ePack = es[i] as EnergyPack;
-            const visionTriangle = new Triangle(
-              eye.direction2
-                .clone()
-                .applyAxisAngle(new Vector3(0, 0, 1), -e1.rotation)
-                .add(e1.mesh.position),
-              e1.mesh.position,
-              eye.direction1
-                .clone()
-                .applyAxisAngle(new Vector3(0, 0, 1), -e1.rotation)
-                .add(e1.mesh.position)
-            );
-            if (visionTriangle.containsPoint(ePack.mesh.position)) {
-              hitEnergyPack = true;
-              const newDistance = e1.mesh.position.distanceTo(
-                ePack.mesh.position
-              );
-              if (newDistance < energyPackDistance) {
-                energyPackDistance = newDistance;
-              }
-            }
-            if (hitEnergyPack) {
-              eye.hitEnergyPack(energyPackDistance);
-            } else {
-              eye.unhitEnergyPack();
-            }
+          const org = es[i] as Organism;
+          const newDistance = e1.mesh.position.distanceTo(org.mesh.position);
+          if (newDistance < distance) {
+            distance = newDistance;
+            target = org;
+            hit = true;
           }
         });
+        if (hit) {
+          if (target instanceof Organism) {
+            eye.hit(
+              distance,
+              e1.genome.getUnSimilarityTo(target.genome),
+              new Vector3(1, 0, 0)
+                .applyAxisAngle(new Vector3(0, 0, 1), -e1.rotation)
+                .angleTo(target.mesh.position)
+            );
+          }
+        }
       });
 
       indexes.forEach((i: number) => {
