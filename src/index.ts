@@ -60,9 +60,6 @@ data.obstacles.forEach((obstacle) => {
 });
 data.organisms.forEach((org) => {
   scene.add(org.mesh);
-  scene.add(org.eyes[0].mesh);
-  scene.add(org.eyes[1].mesh);
-  scene.add(org.eyes[2].mesh);
   // scene.add(org.eyes[3].mesh);
   // scene.add(org.eyes[4].mesh);
 });

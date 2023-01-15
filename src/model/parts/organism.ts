@@ -18,6 +18,7 @@ export class OrganismAttributes {
   public moveDrain: number;
   public energyDrain: number;
   public energyGain: number;
+  public fieldOfView: number;
 }
 
 export class Organism extends Entity {
@@ -52,27 +53,7 @@ export class Organism extends Entity {
 
     this.mesh = new THREE.Mesh(geometry, this.material);
 
-    this.eyes.push(
-      new Eye(
-        this.mesh.position,
-        new Vector3(this.attributes.eyeSight / 4, this.attributes.eyeSight, 0),
-        new Vector3(-this.attributes.eyeSight / 4, this.attributes.eyeSight, 0)
-      )
-    );
-    this.eyes.push(
-      new Eye(
-        this.mesh.position,
-        new Vector3(-this.attributes.eyeSight, this.attributes.eyeSight / 2, 0),
-        new Vector3(-this.attributes.eyeSight / 4, this.attributes.eyeSight, 0)
-      )
-    );
-    this.eyes.push(
-      new Eye(
-        this.mesh.position,
-        new Vector3(this.attributes.eyeSight, this.attributes.eyeSight / 2, 0),
-        new Vector3(this.attributes.eyeSight / 4, this.attributes.eyeSight, 0)
-      )
-    );
+    this.eyes.push(new Eye(this.attributes.fieldOfView));
     // // this.eyes.push(new Eye(this.mesh.position, new Vector3(0, this.eyeSight * 0.0, 0), new Vector3(0, 0, 0)))
     // this.eyes.push(new Eye(this.mesh.position, new Vector3(-this.eyeSight, this.eyeSight / 2, 0), new Vector3(-this.eyeSight, 0, 0)))
     // this.eyes.push(new Eye(this.mesh.position, new Vector3(this.eyeSight, this.eyeSight / 2, 0), new Vector3(this.eyeSight, 0, 0)))
@@ -136,18 +117,9 @@ export class Organism extends Entity {
       this.attributes.energyDrain = -0.2;
     }
 
-    this.energy = this.attributes.baseEnergy;
-  }
+    this.attributes.fieldOfView = Math.PI;
 
-  private updateEyes(): void {
-    this.eyes.forEach((eye) => {
-      eye.mesh.position.set(
-        this.mesh.position.x,
-        this.mesh.position.y,
-        this.mesh.position.z
-      );
-      eye.mesh.setRotationFromAxisAngle(new Vector3(0, 0, 1), -this.rotation);
-    });
+    this.energy = this.attributes.baseEnergy;
   }
 
   private updatePosition(): void {
@@ -185,36 +157,32 @@ export class Organism extends Entity {
     this.energy -= this.attributes.energyDrain;
     if (this.hasMouth) {
       this.brain.inputs = [
-        this.eyes[0].hitEPack
-          ? 1 - this.eyes[0].energyPackDistance / this.attributes.eyeSight / 5
+        this.eyes[0].active
+          ? 1 - this.eyes[0].distance / this.attributes.eyeSight
           : 0,
-        this.eyes[1].hitEPack
-          ? 1 - this.eyes[1].energyPackDistance / this.attributes.eyeSight / 5
+        this.eyes[0].active &&
+        this.eyes[0].angle > 0 &&
+        this.eyes[0].angle < Math.PI / 2
+          ? 1
           : 0,
-        this.eyes[2].hitEPack
-          ? 1 - this.eyes[2].energyPackDistance / this.attributes.eyeSight / 5
+        this.eyes[0].active &&
+        this.eyes[0].angle > Math.PI / 2 &&
+        this.eyes[0].angle < Math.PI
+          ? 1 - this.eyes[0].angle / Math.PI / 2
           : 0,
-        this.eyes[0].organismHit
-          ? 1 - this.eyes[0].OrganismDistance / this.attributes.eyeSight / 5
+        this.eyes[0].active &&
+        this.eyes[0].angle > Math.PI &&
+        this.eyes[0].angle < Math.PI + Math.PI / 2
+          ? 1 - this.eyes[0].angle / Math.PI / 2
           : 0,
-        this.eyes[1].organismHit
-          ? 1 - this.eyes[1].OrganismDistance / this.attributes.eyeSight / 5
+        this.eyes[0].active &&
+        this.eyes[0].angle > Math.PI + Math.PI / 2 &&
+        this.eyes[0].angle < Math.PI * 2
+          ? 1 - this.eyes[0].angle / Math.PI / 2
           : 0,
-        this.eyes[2].organismHit
-          ? 1 - this.eyes[2].OrganismDistance / this.attributes.eyeSight / 5
-          : 0,
-        this.eyes[0].organismHit
+        this.eyes[0].active
           ? 1 - this.eyes[0].genomeDistance / this.genome.words.length
           : 0,
-        this.eyes[1].organismHit
-          ? 1 - this.eyes[1].genomeDistance / this.genome.words.length
-          : 0,
-        this.eyes[2].organismHit
-          ? 1 - this.eyes[2].genomeDistance / this.genome.words.length
-          : 0,
-        // this.eyes[0].hitEPack ? this.eyes[0].energyPackDistance : 0,
-        // this.eyes[1].hitEPack ? this.eyes[1].energyPackDistance : 0,
-        // this.eyes[2].hitEPack ? this.eyes[2].energyPackDistance : 0,
         this.acceleration,
         this.energy / this.attributes.maxEnergy / 2,
       ];
@@ -263,7 +231,6 @@ export class Organism extends Entity {
     this.updatePosition();
     this.updateSpeed();
     this.updateAcceleration();
-    this.updateEyes();
     this.updateBrain();
     this.updateMultiplyingRediness();
   }
