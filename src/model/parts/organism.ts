@@ -15,6 +15,7 @@ export class OrganismAttributes {
   public eyeSight: number;
   public brainSize: number;
   public lifespan: number;
+  public energyDrain: number;
 }
 
 export class Organism extends Entity {
@@ -25,7 +26,6 @@ export class Organism extends Entity {
 
   public isDead: boolean = true;
   public timeAlive = 0;
-  public energy = 0;
   private children: number = 0;
   private genome: Genome;
 
@@ -40,17 +40,13 @@ export class Organism extends Entity {
   constructor(brain: Brain, genome: Genome) {
     super();
     let geometry = new THREE.IcosahedronGeometry(0.1, 2);
-
-    this.material = new THREE.MeshBasicMaterial({
-      color: new THREE.Color(64, 64, 64),
-    });
-    this.initByGenome(genome);
-
-    this.mesh = new THREE.Mesh(geometry, this.material);
     if (brain) {
       this.brain = brain;
       this.attributes.brainSize = brain.hidden.length;
     }
+    this.initByGenome(genome);
+
+    this.mesh = new THREE.Mesh(geometry, this.material);
 
     this.eyes.push(
       new Eye(
@@ -80,14 +76,16 @@ export class Organism extends Entity {
 
   private initByGenome(genome: Genome): void {
     const r =
-      Math.floor(genome.words[0] * 100) + Math.floor(genome.words[1] * 100);
+      Math.floor(genome.words[6] * 100) +
+      Math.floor(genome.words[1] * 100) +
+      50;
     const g =
       Math.floor(genome.words[2] * 100) + Math.floor(genome.words[3] * 100);
-    const b =
-      Math.floor(genome.words[4] * 100) + Math.floor(genome.words[5] * 100);
+    const b = Math.floor(genome.words[4] * 200) + 50;
 
-    this.material.color.set(new THREE.Color(r, g, b));
-    this.material.color.convertSRGBToLinear();
+    this.material = new THREE.MeshBasicMaterial({
+      color: new THREE.Color(`rgb(${r}, ${g}, ${b})`),
+    });
 
     this.speed = new THREE.Vector3(0.001, 0, 0);
     this.genome = genome;
@@ -103,6 +101,8 @@ export class Organism extends Entity {
     this.attributes.eyeSight = genome.words[4] * MaxAttributes.EYE_SIGHT;
     this.attributes.multiplyAge = genome.words[5] * MaxAttributes.MULTIPLY_AGE;
     this.attributes.maxEnergy = genome.words[6] * MaxAttributes.MAX_ENERGY;
+    this.attributes.energyDrain =
+      this.attributes.brainSize + this.attributes.eyeSight * 0.001;
 
     this.energy = this.attributes.baseEnergy;
   }
@@ -151,7 +151,8 @@ export class Organism extends Entity {
       return;
     }
 
-    this.energy -= this.attributes.brainSize * 0.001;
+    // TODO idle drainage of energy should be a function of brain size and other genoms
+    this.energy -= this.attributes.energyDrain;
     this.brain.inputs = [
       this.eyes[0].hitEPack
         ? 1 - this.eyes[0].energyPackDistance / this.attributes.eyeSight / 5
@@ -245,7 +246,7 @@ export class Organism extends Entity {
     const newBrain = this.brain.copy();
     const newGenes = this.genome.copy();
     newBrain.mutate(mutateFactor);
-    newGenes.mutate(mutateFactor);
+    newGenes.mutate(mutateFactor / 10);
     const newOrganism = new Organism(newBrain, newGenes);
     newOrganism.mesh.position.set(
       this.mesh.position.x,

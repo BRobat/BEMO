@@ -27,7 +27,7 @@ export class Data {
   constructor(private mapSize: number) {
     this.hashThreshold = 10;
     this.initBrains();
-    this.initOrganisms(100);
+    this.initOrganisms(500);
     this.initEnergyPacks();
   }
 
@@ -48,11 +48,27 @@ export class Data {
     this.hashEntities();
     this.collideEntities();
     this.organisms.forEach((org) => {
+      const deadStatus = org.isDead;
+      const pos = org.mesh.position.clone();
+      const energy = org.energy;
       org.update();
+      if (!deadStatus && org.isDead) {
+        this.addEnergyPack(pos, energy);
+      }
     });
     this.getOffsprings();
-    this.updateEnergyPacks();
+    // this.updateEnergyPacks();
     this.getDeadOrganisms();
+  }
+
+  public addEnergyPack(position: THREE.Vector3, energy: number): void {
+    const n = this.energyPacks.find((energyPack) => !energyPack.isActive);
+    if (n == null) {
+      return;
+    }
+    n.mesh.position.set(position.x, position.y, 0);
+    n.energy = energy + 10;
+    n.activate();
   }
 
   public updateEnergyPacks() {
@@ -117,7 +133,7 @@ export class Data {
   private initEnergyPacks() {
     this.energyPacks = [];
     for (let i = 0; i < this.batchSize; i++) {
-      if (i < 500) {
+      if (i < 0) {
         const newEnergyPack = new EnergyPack();
         newEnergyPack.mesh.position.set(
           Math.random() * this.mapSize - this.mapSize / 2,
@@ -128,6 +144,7 @@ export class Data {
         this.entities.push(newEnergyPack);
       } else {
         const newEnergyPack = new EnergyPack();
+        newEnergyPack.deactivate();
         newEnergyPack.mesh.position.set(300, 300, 0);
         this.energyPacks.push(newEnergyPack);
         this.entities.push(newEnergyPack);
@@ -154,8 +171,8 @@ export class Data {
     });
     for (let i = 0; i < noOfOrganisms; i++) {
       this.organisms[i].isDead = false;
-      this.organisms[i].energy = 500;
-      this.organisms[i].attributes.lifespan = 1500;
+      this.organisms[i].energy = 200;
+      this.organisms[i].attributes.lifespan = 500;
       this.organisms[i].mesh.position.set(
         Math.random() * this.mapSize - this.mapSize / 2,
         Math.random() * this.mapSize - this.mapSize / 2,

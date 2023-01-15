@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { Data } from "./model/utils/data";
 import { Obstacle } from "./model/parts/obstacle";
+import { Organism } from "./model/parts/organism";
 
 let scene = new THREE.Scene();
 let camera = new THREE.PerspectiveCamera(
@@ -75,9 +76,16 @@ camera.position.z = 200;
 setInterval(() => {}, 10000);
 
 function updateLabel() {
+  let energy = 0;
+  data.entities.forEach((entity) => {
+    energy += entity.energy;
+  });
+
   element.innerText = `Tick: ${tick / 10}\n Organisms: ${
     data.aliveOrganisms
-  } \n Plankton: ${data.energyPacks.filter((e) => e.isActive).length}`;
+  } \n Dead matter: ${
+    data.energyPacks.filter((e) => e.isActive).length
+  }\n Total energy: ${Math.floor(energy)}`;
 }
 
 function animate() {

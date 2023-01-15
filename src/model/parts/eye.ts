@@ -10,7 +10,7 @@ export class Eye {
 
   hitMaterial: THREE.MeshBasicMaterial = new THREE.MeshBasicMaterial({
     color: 0x00aa22,
-    opacity: 0.01,
+    opacity: 0.0,
     transparent: true,
   });
   unhitMaterial: THREE.MeshBasicMaterial = new THREE.MeshBasicMaterial({
