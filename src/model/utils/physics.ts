@@ -6,6 +6,7 @@ import { Eye } from "../parts/eye";
 import { MathFunctions } from "./math";
 import { EnergyPack } from "../parts/energyPack";
 import { HashUtils } from "./hashUtils";
+import { random16 } from "three/src/math/MathUtils";
 
 export class Physics {
   static collideEntities(
@@ -17,7 +18,7 @@ export class Physics {
       return;
     }
     es.forEach((e1: Entity, j) => {
-      if (!(e1 instanceof Organism) || e1.isDead) {
+      if (!(e1 instanceof Organism) || e1.isDead || !e1.hasMouth) {
         return;
       }
       const eHash = HashUtils.getEntityHash(e1, hashThreshold);
@@ -32,11 +33,41 @@ export class Physics {
       });
       indexes = [...new Set(indexes)];
       e1.eyes.forEach((eye) => {
+        let hitOrganism = false;
+        let organismDistance = 10000;
         let hitEnergyPack = false;
         let energyPackDistance = 10000;
         indexes.forEach((i: number) => {
           if (es[i] instanceof Organism) {
-            return;
+            const org = es[i] as Organism;
+            const visionTriangle = new Triangle(
+              eye.direction2
+                .clone()
+                .applyAxisAngle(new Vector3(0, 0, 1), -e1.rotation)
+                .add(e1.mesh.position),
+              e1.mesh.position,
+              eye.direction1
+                .clone()
+                .applyAxisAngle(new Vector3(0, 0, 1), -e1.rotation)
+                .add(e1.mesh.position)
+            );
+            if (visionTriangle.containsPoint(org.mesh.position)) {
+              hitOrganism = true;
+              const newDistance = e1.mesh.position.distanceTo(
+                org.mesh.position
+              );
+              if (newDistance < organismDistance) {
+                organismDistance = newDistance;
+              }
+            }
+            if (hitOrganism) {
+              eye.hitOrganism(
+                organismDistance,
+                e1.genome.getUnSimilarityTo(org.genome)
+              );
+            } else {
+              eye.unhitOrganism();
+            }
           } else if (es[i] instanceof EnergyPack) {
             const ePack = es[i] as EnergyPack;
             const visionTriangle = new Triangle(
@@ -67,11 +98,15 @@ export class Physics {
           }
         });
       });
+
       indexes.forEach((i: number) => {
         if (Physics.collisionDetection(e1, es[i])) {
           if (es[i] instanceof Organism) {
-            const org = es[i] as Organism;
-            // e.touch
+            if (e1.isAggresive && e1 != es[i]) {
+              const org = es[i] as Organism;
+              e1.energy += org.energy;
+              org.kill("killed");
+            }
           } else {
             const energy = es[i] as EnergyPack;
             e1.addEnergy(energy.energy);

@@ -4,12 +4,11 @@ import { Entity } from "./entity";
 export class EnergyPack extends Entity {
   public isActive: boolean = true;
 
-  public energy = 200;
-
   constructor() {
     super();
     let geometry = new THREE.IcosahedronGeometry(0.1, 2);
-    let material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+    let material = new THREE.MeshBasicMaterial({ color: 0x222222 });
+    this.energy = 100;
     this.mesh = new THREE.Mesh(geometry, material);
   }
 
@@ -21,6 +20,6 @@ export class EnergyPack extends Entity {
 
   public activate() {
     this.isActive = true;
-    this.mesh.material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+    this.mesh.material = new THREE.MeshBasicMaterial({ color: 0x222222 });
   }
 }
