@@ -39,19 +39,20 @@ export class Organism extends Entity {
   public attributes: OrganismAttributes = new OrganismAttributes();
 
   private material: THREE.MeshBasicMaterial;
+  private geometry: THREE.BufferGeometry;
 
   public eyes: Eye[] = [];
 
   constructor(brain: Brain, genome: Genome) {
     super();
-    let geometry = new THREE.IcosahedronGeometry(0.1, 2);
+
     if (brain) {
       this.brain = brain;
       this.attributes.brainSize = brain.hidden.length;
     }
     this.initByGenome(genome);
 
-    this.mesh = new THREE.Mesh(geometry, this.material);
+    this.mesh = new THREE.Mesh(this.geometry, this.material);
 
     this.eyes.push(new Eye(this.attributes.fieldOfView));
     // // this.eyes.push(new Eye(this.mesh.position, new Vector3(0, this.eyeSight * 0.0, 0), new Vector3(0, 0, 0)))
@@ -70,8 +71,17 @@ export class Organism extends Entity {
     } else if (r > 255) {
       r = 255;
     }
+
     const g = Math.floor(genome.words[7] * 250);
     const b = Math.floor(genome.words[4] * 200) + 50;
+
+    if (genome.words[7] > 0.5) {
+      this.hasMouth = false;
+      this.geometry = new THREE.IcosahedronGeometry(0.2, 2);
+    } else {
+      this.hasMouth = true;
+      this.geometry = new THREE.CapsuleGeometry(0.1, 0.2, 4, 8);
+    }
 
     this.material = new THREE.MeshBasicMaterial({
       color: new THREE.Color(`rgb(${r}, ${g}, ${b})`),
@@ -79,6 +89,7 @@ export class Organism extends Entity {
 
     if (this.mesh?.material) {
       this.mesh.material = this.material;
+      this.mesh.geometry = this.geometry;
     }
 
     this.speed = new THREE.Vector3(0.001, 0, 0);
@@ -87,11 +98,7 @@ export class Organism extends Entity {
     this.acceleration = 0.0;
 
     this.attributes.energyGain = genome.words[7] * MaxAttributes.ENERGY_GAIN;
-    if (genome.words[7] > 0.5) {
-      this.hasMouth = false;
-    } else {
-      this.hasMouth = true;
-    }
+
     this.attributes.baseEnergy = genome.words[0] * MaxAttributes.BASE_ENERGY;
     this.attributes.lifespan = genome.words[1] * MaxAttributes.LIFESPAN;
     this.attributes.speedMultiplier =
@@ -110,12 +117,9 @@ export class Organism extends Entity {
       Math.pow(1 - genome.words[7], 2);
     this.attributes.multiplyAge = genome.words[5] * MaxAttributes.MULTIPLY_AGE;
     this.attributes.maxEnergy = genome.words[6] * MaxAttributes.MAX_ENERGY;
-    if (this.hasMouth) {
-      this.attributes.energyDrain =
-        (this.attributes.brainSize + this.attributes.eyeSight) * 0.0005;
-    } else {
-      this.attributes.energyDrain = -0.2;
-    }
+
+    this.attributes.energyDrain =
+      (this.attributes.brainSize + this.attributes.eyeSight) * 0.0005;
 
     this.attributes.fieldOfView = Math.PI;
 
@@ -181,7 +185,7 @@ export class Organism extends Entity {
           ? 1 - this.eyes[0].angle / Math.PI / 2
           : 0,
         this.eyes[0].active
-          ? 1 - this.eyes[0].genomeDistance / this.genome.words.length
+          ? this.eyes[0].genomeDistance / this.genome.words.length
           : 0,
         this.acceleration,
         this.energy / this.attributes.maxEnergy / 2,

@@ -19,6 +19,7 @@ export class Data {
   public batchSize: number = 2000;
 
   public aliveOrganisms: number = 0;
+  public sunEnergy: number = 2;
 
   hashThreshold: number;
 
@@ -27,7 +28,7 @@ export class Data {
   constructor(private mapSize: number) {
     this.hashThreshold = 10;
     this.initBrains();
-    this.initOrganisms(500);
+    this.initOrganisms(1000);
     this.initEnergyPacks();
   }
 
@@ -44,6 +45,7 @@ export class Data {
   }
 
   public updateOrganisms() {
+    this.feedPlants();
     this.teleportOrganisms();
     this.hashEntities();
     this.collideEntities();
@@ -69,6 +71,21 @@ export class Data {
     n.mesh.position.set(position.x, position.y, 0);
     n.energy = energy - 5;
     n.activate();
+  }
+
+  public feedPlants() {
+    this.hashList.forEach((value, key) => {
+      const entities = value.map((index) => this.entities[index]);
+      const plants = entities.filter(
+        (entity) => entity instanceof Organism && !entity.hasMouth
+      ) as Organism[];
+      if (plants.length > 0) {
+        const energy = this.sunEnergy / plants.length;
+        plants.forEach((plant) => {
+          plant.energy += energy * plant.attributes.energyGain;
+        });
+      }
+    });
   }
 
   public updateEnergyPacks() {
@@ -193,6 +210,7 @@ export class Data {
     this.organisms.forEach((org) => {
       if (org.isDead) {
         org.mesh.position.set(300, 300, 0);
+        org.energy = 0;
       }
     });
   }
