@@ -24,7 +24,6 @@ export class Physics {
       const eHash = HashUtils.getEntityHash(e1, hashThreshold);
       const allHashes = HashUtils.getNearHashes(eHash).concat([eHash]);
       let indexes: number[] = [];
-      let toDestroyIndexes = [];
       allHashes.forEach((hashKey: string) => {
         const hash = hashList.get(hashKey);
         if (hash && hash.length !== 0) {
