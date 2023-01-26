@@ -19,7 +19,7 @@ export class Data {
   public batchSize: number = 2000;
 
   public aliveOrganisms: number = 0;
-  public sunEnergy: number = 2;
+  public sunEnergy: number = 0.7;
 
   hashThreshold: number;
 
@@ -127,7 +127,12 @@ export class Data {
           return;
         }
         org.isReadytoMultiply = false;
-        const newOrganism = org.getOffspring(0.1);
+        let newOrganism: Organism = null;
+        if (Math.random() > 0.9999) {
+          newOrganism = org.getOffspring(0.3);
+        } else {
+          newOrganism = org.getOffspring(0.01);
+        }
         n.copyParameters(newOrganism);
       }
     });
@@ -183,6 +188,16 @@ export class Data {
         //   0.4 + Math.random()/ 3,
         //   0.6 - Math.random()/ 3,
         // ])
+        // new Genome([
+        //   Math.random() / 2,
+        //   Math.random(),
+        //   Math.random() / 2,
+        //   Math.random() / 2,
+        //   Math.random() / 2,
+        //   Math.random() / 2,
+        //   Math.random() / 2,
+        //   Math.random() - 0.3,
+        // ])
         new Genome([
           Math.random(),
           Math.random(),
@@ -199,8 +214,6 @@ export class Data {
     });
     for (let i = 0; i < noOfOrganisms; i++) {
       this.organisms[i].isDead = false;
-      this.organisms[i].energy = 200;
-      this.organisms[i].attributes.lifespan = 500;
       this.organisms[i].mesh.position.set(
         Math.random() * this.mapSize - this.mapSize / 2,
         Math.random() * this.mapSize - this.mapSize / 2,
