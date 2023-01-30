@@ -7,7 +7,7 @@ export class Eye {
   public pixels: Pixel[] = [];
   public fov: number = 0;
 
-  constructor(fov: number, resolution: number) {
+  constructor(fov: number, resolution: number, private alertness: number) {
     this.fov = fov;
     for (let i = 0; i < resolution; i++) {
       this.pixels.push(new Pixel());
@@ -17,12 +17,12 @@ export class Eye {
   hit(distance: number, genomeDistance: number, angle: number) {
     const pixel = this.determinePixel(angle);
     if (genomeDistance > 1) {
-      pixel.negativeSignal += distance / 10;
+      pixel.negativeSignal += distance / this.alertness;
       if (pixel.negativeSignal > 1) {
         pixel.negativeSignal = 1;
       }
     } else {
-      pixel.positiveSignal += distance / 10;
+      pixel.positiveSignal += distance / this.alertness;
       if (pixel.positiveSignal > 1) {
         pixel.positiveSignal = 1;
       }

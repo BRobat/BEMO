@@ -19,6 +19,7 @@ export class OrganismAttributes {
   public energyDrain: number;
   public energyGain: number;
   public fieldOfView: number;
+  public alertness: number;
 }
 
 export class Organism extends Entity {
@@ -54,7 +55,6 @@ export class Organism extends Entity {
 
     this.mesh = new THREE.Mesh(this.geometry, this.material);
 
-    this.eyes = new Eye(Math.PI * 2, 4);
     // // this.eyes.push(new Eye(this.mesh.position, new Vector3(0, this.eyeSight * 0.0, 0), new Vector3(0, 0, 0)))
     // this.eyes.push(new Eye(this.mesh.position, new Vector3(-this.eyeSight, this.eyeSight / 2, 0), new Vector3(-this.eyeSight, 0, 0)))
     // this.eyes.push(new Eye(this.mesh.position, new Vector3(this.eyeSight, this.eyeSight / 2, 0), new Vector3(this.eyeSight, 0, 0)))
@@ -124,6 +124,10 @@ export class Organism extends Entity {
     this.attributes.fieldOfView = Math.PI;
 
     this.energy = this.attributes.baseEnergy;
+
+    this.attributes.alertness = genome.words[8] * MaxAttributes.ALERTNESS;
+
+    this.eyes = new Eye(Math.PI * 2, 4, this.attributes.alertness);
   }
 
   private updatePosition(): void {

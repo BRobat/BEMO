@@ -207,6 +207,7 @@ export class Data {
           Math.random(),
           Math.random(),
           Math.random(),
+          Math.random(),
         ])
       );
       this.organisms.push(newOrganism);
