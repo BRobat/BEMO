@@ -41,7 +41,7 @@ export class Organism extends Entity {
   private material: THREE.MeshBasicMaterial;
   private geometry: THREE.BufferGeometry;
 
-  public eyes: Eye[] = [];
+  public eyes: Eye = null;
 
   constructor(brain: Brain, genome: Genome) {
     super();
@@ -54,7 +54,7 @@ export class Organism extends Entity {
 
     this.mesh = new THREE.Mesh(this.geometry, this.material);
 
-    this.eyes.push(new Eye(this.attributes.fieldOfView));
+    this.eyes = new Eye(Math.PI * 2, 4);
     // // this.eyes.push(new Eye(this.mesh.position, new Vector3(0, this.eyeSight * 0.0, 0), new Vector3(0, 0, 0)))
     // this.eyes.push(new Eye(this.mesh.position, new Vector3(-this.eyeSight, this.eyeSight / 2, 0), new Vector3(-this.eyeSight, 0, 0)))
     // this.eyes.push(new Eye(this.mesh.position, new Vector3(this.eyeSight, this.eyeSight / 2, 0), new Vector3(this.eyeSight, 0, 0)))
@@ -128,7 +128,7 @@ export class Organism extends Entity {
 
   private updatePosition(): void {
     if (this.isDead) {
-      this.eyes.forEach((eye) => eye.unhit());
+      this.eyes.reset();
       return;
     }
     this.timeAlive++;
@@ -161,31 +161,29 @@ export class Organism extends Entity {
     this.energy -= this.attributes.energyDrain;
     if (this.hasMouth) {
       this.brain.inputs = [
-        this.eyes[0].active
-          ? 1 - this.eyes[0].distance / this.attributes.eyeSight
+        this.eyes.pixels[0].negativeSignal
+          ? this.eyes.pixels[0].negativeSignal
           : 0,
-        this.eyes[0].active &&
-        this.eyes[0].angle > 0 &&
-        this.eyes[0].angle < Math.PI / 2
-          ? 1
+        this.eyes.pixels[0].positiveSignal
+          ? this.eyes.pixels[0].positiveSignal
           : 0,
-        this.eyes[0].active &&
-        this.eyes[0].angle > Math.PI / 2 &&
-        this.eyes[0].angle < Math.PI
-          ? 1 - this.eyes[0].angle / Math.PI / 2
+        this.eyes.pixels[1].negativeSignal
+          ? this.eyes.pixels[1].negativeSignal
           : 0,
-        this.eyes[0].active &&
-        this.eyes[0].angle > Math.PI &&
-        this.eyes[0].angle < Math.PI + Math.PI / 2
-          ? 1 - this.eyes[0].angle / Math.PI / 2
+        this.eyes.pixels[1].positiveSignal
+          ? this.eyes.pixels[1].positiveSignal
           : 0,
-        this.eyes[0].active &&
-        this.eyes[0].angle > Math.PI + Math.PI / 2 &&
-        this.eyes[0].angle < Math.PI * 2
-          ? 1 - this.eyes[0].angle / Math.PI / 2
+        this.eyes.pixels[2].negativeSignal
+          ? this.eyes.pixels[2].negativeSignal
           : 0,
-        this.eyes[0].active
-          ? this.eyes[0].genomeDistance / this.genome.words.length
+        this.eyes.pixels[2].positiveSignal
+          ? this.eyes.pixels[2].positiveSignal
+          : 0,
+        this.eyes.pixels[3].negativeSignal
+          ? this.eyes.pixels[3].negativeSignal
+          : 0,
+        this.eyes.pixels[3].positiveSignal
+          ? this.eyes.pixels[3].positiveSignal
           : 0,
         this.acceleration,
         this.energy / this.attributes.maxEnergy / 2,
@@ -200,7 +198,7 @@ export class Organism extends Entity {
       if (output[2] > 0.5) {
         this.accelerate((output[2] - 0.5) * 2);
       }
-      if (output[3] > 0.5) {
+      if (output[3] > 0.9) {
         this.isAggresive = true;
       } else {
         this.isAggresive = false;

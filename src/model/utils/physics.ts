@@ -2,7 +2,7 @@ import { Vector3, Triangle } from "three";
 import { Organism } from "../parts/organism";
 import { Obstacle } from "../parts/obstacle";
 import { Entity } from "../parts/entity";
-import { Eye } from "../parts/eye";
+import { Eye, Pixel } from "../parts/eye";
 import { MathFunctions } from "./math";
 import { EnergyPack } from "../parts/energyPack";
 import { HashUtils } from "./hashUtils";
@@ -31,24 +31,26 @@ export class Physics {
         }
       });
       indexes = [...new Set(indexes)];
-      e1.eyes.forEach((eye) => {
-        let hit = false;
-        let distance = e1.attributes.eyeSight;
-        let target: Entity;
-        indexes.forEach((i: number) => {
-          const org = es[i] as Organism;
-          const newDistance = e1.mesh.position.distanceTo(org.mesh.position);
-          if (newDistance < distance) {
-            distance = newDistance;
-            target = org;
-            hit = true;
-          }
-        });
-        if (hit) {
+
+      let distance = e1.attributes.eyeSight;
+      let target: Entity;
+      indexes.forEach((i: number) => {
+        const org = es[i] as Organism;
+        const newDistance = e1.mesh.position.distanceTo(org.mesh.position);
+        if (newDistance < distance) {
+          target = org;
           if (target instanceof Organism) {
-            eye.hit(
+            e1.eyes.hit(
               distance,
               e1.genome.getUnSimilarityTo(target.genome),
+              new Vector3(1, 0, 0)
+                .applyAxisAngle(new Vector3(0, 0, 1), -e1.rotation)
+                .angleTo(target.mesh.position)
+            );
+          } else {
+            e1.eyes.hit(
+              distance,
+              0,
               new Vector3(1, 0, 0)
                 .applyAxisAngle(new Vector3(0, 0, 1), -e1.rotation)
                 .angleTo(target.mesh.position)
