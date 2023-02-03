@@ -10,9 +10,8 @@ to bundle this app
 
 ## TODO
 
-- remake photosynthesis to be more realistic
-- add brain to eye so it would be easier to work on resolution and behaviour
-- make it possible for the organism to see more than one entity at a time
+- make fight mechanism
+-
 - add memory to the brain
 - Maybe give genome a direction in some ways that organisms could have it easier to decide what to do
 - rework eating

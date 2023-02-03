@@ -6,6 +6,7 @@ export class EnergyPack extends Entity {
 
   constructor() {
     super();
+    // geometry should be moved to activate() method
     let geometry = new THREE.IcosahedronGeometry(0.1, 2);
     let material = new THREE.MeshBasicMaterial({ color: 0x222222 });
     this.energy = 100;

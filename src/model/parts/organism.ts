@@ -20,6 +20,10 @@ export class OrganismAttributes {
   public energyGain: number;
   public fieldOfView: number;
   public alertness: number;
+  public maxHP: number;
+  public regenRate: number;
+  public attack: number;
+  public defense: number;
 }
 
 export class Organism extends Entity {
@@ -36,6 +40,7 @@ export class Organism extends Entity {
 
   public isReadytoMultiply = false;
   public isAggresive = false;
+  public hp: number;
 
   public attributes: OrganismAttributes = new OrganismAttributes();
 
@@ -54,13 +59,11 @@ export class Organism extends Entity {
     this.initByGenome(genome);
 
     this.mesh = new THREE.Mesh(this.geometry, this.material);
-
-    // // this.eyes.push(new Eye(this.mesh.position, new Vector3(0, this.eyeSight * 0.0, 0), new Vector3(0, 0, 0)))
-    // this.eyes.push(new Eye(this.mesh.position, new Vector3(-this.eyeSight, this.eyeSight / 2, 0), new Vector3(-this.eyeSight, 0, 0)))
-    // this.eyes.push(new Eye(this.mesh.position, new Vector3(this.eyeSight, this.eyeSight / 2, 0), new Vector3(this.eyeSight, 0, 0)))
   }
 
   private initByGenome(genome: Genome): void {
+    // TODO: colors and appearance should be moved to separate class - also change how material is created to show different genes
+
     let r =
       Math.floor(genome.words[6] * 100) +
       Math.floor(genome.words[1] * 100) -
@@ -92,6 +95,8 @@ export class Organism extends Entity {
       this.mesh.geometry = this.geometry;
     }
 
+    // TODO: rules could be moved to separate class
+
     this.speed = new THREE.Vector3(0.001, 0, 0);
     this.genome = genome;
     this.rotation = 0;
@@ -101,20 +106,25 @@ export class Organism extends Entity {
 
     this.attributes.baseEnergy = genome.words[0] * MaxAttributes.BASE_ENERGY;
     this.attributes.lifespan = genome.words[1] * MaxAttributes.LIFESPAN;
+
     this.attributes.speedMultiplier =
       genome.words[2] *
       MaxAttributes.SPEED_MULTIPLIER *
       Math.pow(1 - genome.words[7], 2);
+
     this.attributes.moveDrain =
       genome.words[2] * MaxAttributes.SPEED_MULTIPLIER + genome.words[7];
+
     this.attributes.rotationMultiplier =
       genome.words[3] *
       MaxAttributes.ROTATION_MULTIPLIER *
       Math.pow(1 - genome.words[7], 2);
+
     this.attributes.eyeSight =
       genome.words[4] *
       MaxAttributes.EYE_SIGHT *
       Math.pow(1 - genome.words[7], 2);
+
     this.attributes.multiplyAge = genome.words[5] * MaxAttributes.MULTIPLY_AGE;
     this.attributes.maxEnergy = genome.words[6] * MaxAttributes.MAX_ENERGY;
 
@@ -171,11 +181,17 @@ export class Organism extends Entity {
         this.eyes.pixels[0].positiveSignal
           ? this.eyes.pixels[0].positiveSignal
           : 0,
+        this.eyes.pixels[0].freeFoodSignal
+          ? this.eyes.pixels[0].freeFoodSignal
+          : 0,
         this.eyes.pixels[1].negativeSignal
           ? this.eyes.pixels[1].negativeSignal
           : 0,
         this.eyes.pixels[1].positiveSignal
           ? this.eyes.pixels[1].positiveSignal
+          : 0,
+        this.eyes.pixels[1].freeFoodSignal
+          ? this.eyes.pixels[1].freeFoodSignal
           : 0,
         this.eyes.pixels[2].negativeSignal
           ? this.eyes.pixels[2].negativeSignal
@@ -183,11 +199,17 @@ export class Organism extends Entity {
         this.eyes.pixels[2].positiveSignal
           ? this.eyes.pixels[2].positiveSignal
           : 0,
+        this.eyes.pixels[2].freeFoodSignal
+          ? this.eyes.pixels[2].freeFoodSignal
+          : 0,
         this.eyes.pixels[3].negativeSignal
           ? this.eyes.pixels[3].negativeSignal
           : 0,
         this.eyes.pixels[3].positiveSignal
           ? this.eyes.pixels[3].positiveSignal
+          : 0,
+        this.eyes.pixels[3].freeFoodSignal
+          ? this.eyes.pixels[3].freeFoodSignal
           : 0,
         this.acceleration,
         this.energy / this.attributes.maxEnergy / 2,

@@ -1,6 +1,8 @@
 export class Pixel {
+  // TODO: rework this so that the organism could differeciate between races.
   positiveSignal: number = 0;
   negativeSignal: number = 0;
+  freeFoodSignal: number = 0;
 }
 
 export class Eye {
@@ -16,13 +18,19 @@ export class Eye {
 
   hit(distance: number, genomeDistance: number, angle: number) {
     const pixel = this.determinePixel(angle);
+    // TODO: check pixelSignal function
     if (genomeDistance > 1) {
-      pixel.negativeSignal += distance / this.alertness;
+      pixel.negativeSignal += (1 / distance) * this.alertness;
       if (pixel.negativeSignal > 1) {
         pixel.negativeSignal = 1;
       }
+    } else if (genomeDistance === 0) {
+      pixel.freeFoodSignal += (1 / distance) * this.alertness;
+      if (pixel.freeFoodSignal > 1) {
+        pixel.freeFoodSignal = 1;
+      }
     } else {
-      pixel.positiveSignal += distance / this.alertness;
+      pixel.positiveSignal += (1 / distance) * this.alertness;
       if (pixel.positiveSignal > 1) {
         pixel.positiveSignal = 1;
       }
@@ -30,6 +38,7 @@ export class Eye {
   }
 
   determinePixel(angle: number): Pixel {
+    // TODO: rotate so if fov is smaller than 360, it is centered.
     const pixelAngle = this.fov / this.pixels.length;
     const pixelIndex = Math.floor(angle / pixelAngle);
     return this.pixels[pixelIndex];

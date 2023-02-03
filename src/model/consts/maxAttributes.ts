@@ -7,5 +7,5 @@ export class MaxAttributes {
   static EYE_SIGHT: number = 8;
   static MULTIPLY_AGE: number = 500;
   static ENERGY_GAIN: number = 0.5;
-  static ALERTNESS: number = 100;
+  static ALERTNESS: number = 8;
 }
