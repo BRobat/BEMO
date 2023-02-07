@@ -19,7 +19,7 @@ export class Data {
   public batchSize: number = 2000;
 
   public aliveOrganisms: number = 0;
-  public sunEnergy: number = 0.7;
+  public sunEnergy: number = 0.5;
 
   hashThreshold: number;
 

@@ -42,6 +42,9 @@ export class Organism extends Entity {
   public isAggresive = false;
   public hp: number;
 
+  public brainThreshold: number = 20;
+  public brainTick = 0;
+
   public attributes: OrganismAttributes = new OrganismAttributes();
 
   private material: THREE.MeshBasicMaterial;
@@ -129,7 +132,7 @@ export class Organism extends Entity {
     this.attributes.maxEnergy = genome.words[6] * MaxAttributes.MAX_ENERGY;
 
     this.attributes.energyDrain =
-      (this.attributes.brainSize + this.attributes.eyeSight) * 0.0005;
+      (this.attributes.brainSize + this.attributes.eyeSight) * 0.005;
 
     this.attributes.fieldOfView = Math.PI;
 
@@ -172,6 +175,11 @@ export class Organism extends Entity {
     if (this.isDead) {
       return;
     }
+    if (this.brainTick !== this.brainThreshold) {
+      this.brainTick += 1;
+      return;
+    }
+    this.brainTick = 0;
     this.energy -= this.attributes.energyDrain;
     if (this.hasMouth) {
       this.brain.inputs = [
