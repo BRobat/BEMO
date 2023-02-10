@@ -19,7 +19,7 @@ export class Data {
   public batchSize: number = 2000;
 
   public aliveOrganisms: number = 0;
-  public sunEnergy: number = 0.5;
+  public sunEnergy: number = 0.04;
 
   hashThreshold: number;
 
@@ -54,7 +54,7 @@ export class Data {
       const pos = org.mesh.position.clone();
       const energy = org.energy;
       org.update();
-      if (!deadStatus && org.isDead) {
+      if (!deadStatus && org.isDead && energy > 0) {
         this.addEnergyPack(pos, energy);
       }
     });
@@ -128,7 +128,7 @@ export class Data {
         }
         org.isReadytoMultiply = false;
         let newOrganism: Organism = null;
-        if (Math.random() > 0.9999) {
+        if (Math.random() > 0.99) {
           newOrganism = org.getOffspring(0.3);
         } else {
           newOrganism = org.getOffspring(0.01);
@@ -155,7 +155,7 @@ export class Data {
   private initEnergyPacks() {
     this.energyPacks = [];
     for (let i = 0; i < this.batchSize; i++) {
-      if (i < 0) {
+      if (i < 1000) {
         const newEnergyPack = new EnergyPack();
         newEnergyPack.mesh.position.set(
           Math.random() * this.mapSize - this.mapSize / 2,
@@ -167,7 +167,7 @@ export class Data {
       } else {
         const newEnergyPack = new EnergyPack();
         newEnergyPack.deactivate();
-        newEnergyPack.mesh.position.set(300, 300, 0);
+        newEnergyPack.mesh.position.set(3000, 3000, 0);
         this.energyPacks.push(newEnergyPack);
         this.entities.push(newEnergyPack);
       }
@@ -199,6 +199,11 @@ export class Data {
         //   Math.random() - 0.3,
         // ])
         new Genome([
+          Math.random(),
+          Math.random(),
+          Math.random(),
+          Math.random(),
+          Math.random(),
           Math.random(),
           Math.random(),
           Math.random(),

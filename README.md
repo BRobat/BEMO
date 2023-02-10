@@ -14,9 +14,8 @@ Some of the rules could be simillar to a rpg game.
 
 ## TODO
 
-- make fight mechanism
-- add defense mechanism
-- rework eating
+- rework eating - differentiate makro and energy
+- producters could spit energy packs
 - rework lifespan
 - rework photosynthesis to not stop organism from moving but
 - add walls

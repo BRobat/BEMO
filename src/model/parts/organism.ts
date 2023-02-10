@@ -21,15 +21,16 @@ export class OrganismAttributes {
   public fieldOfView: number;
   public alertness: number;
   public maxHP: number;
-  public regenRate: number;
+  public regeneration: number;
   public attack: number;
   public defense: number;
+  public brainSpeed: number;
 }
 
 export class Organism extends Entity {
   public rotation: number;
   public acceleration: number;
-  private speed: THREE.Vector3;
+  public speed: THREE.Vector3;
   public brain: Brain;
 
   public isDead: boolean = true;
@@ -105,18 +106,33 @@ export class Organism extends Entity {
     this.rotation = 0;
     this.acceleration = 0.0;
 
+    this.attributes.maxHP = genome.words[9] * MaxAttributes.MAX_HEALTH;
+    this.hp = this.attributes.maxHP;
+    this.attributes.regeneration =
+      genome.words[10] * MaxAttributes.REGENERATION;
+    this.attributes.attack = genome.words[11] * MaxAttributes.ATTACK;
+    this.attributes.defense = genome.words[12] * MaxAttributes.DEFENSE;
+
+    this.attributes.brainSpeed = genome.words[13] * MaxAttributes.BRAIN_SPEED;
+
     this.attributes.energyGain = genome.words[7] * MaxAttributes.ENERGY_GAIN;
 
     this.attributes.baseEnergy = genome.words[0] * MaxAttributes.BASE_ENERGY;
     this.attributes.lifespan = genome.words[1] * MaxAttributes.LIFESPAN;
+    this.attributes.maxEnergy = genome.words[6] * MaxAttributes.MAX_ENERGY;
 
     this.attributes.speedMultiplier =
-      genome.words[2] *
-      MaxAttributes.SPEED_MULTIPLIER *
-      Math.pow(1 - genome.words[7], 2);
+      (genome.words[2] *
+        MaxAttributes.SPEED_MULTIPLIER *
+        Math.pow(1 - genome.words[7], 2)) /
+      this.attributes.maxHP;
 
     this.attributes.moveDrain =
-      genome.words[2] * MaxAttributes.SPEED_MULTIPLIER + genome.words[7];
+      genome.words[2] * MaxAttributes.SPEED_MULTIPLIER +
+      genome.words[7] +
+      this.attributes.maxEnergy +
+      this.attributes.defense +
+      this.attributes.maxHP;
 
     this.attributes.rotationMultiplier =
       genome.words[3] *
@@ -129,10 +145,12 @@ export class Organism extends Entity {
       Math.pow(1 - genome.words[7], 2);
 
     this.attributes.multiplyAge = genome.words[5] * MaxAttributes.MULTIPLY_AGE;
-    this.attributes.maxEnergy = genome.words[6] * MaxAttributes.MAX_ENERGY;
 
     this.attributes.energyDrain =
-      (this.attributes.brainSize + this.attributes.eyeSight) * 0.005;
+      (this.attributes.brainSize +
+        this.attributes.eyeSight +
+        this.attributes.defense) *
+      0.001;
 
     this.attributes.fieldOfView = Math.PI;
 
@@ -175,7 +193,7 @@ export class Organism extends Entity {
     if (this.isDead) {
       return;
     }
-    if (this.brainTick !== this.brainThreshold) {
+    if (this.brainTick < this.attributes.brainSpeed) {
       this.brainTick += 1;
       return;
     }
@@ -219,20 +237,20 @@ export class Organism extends Entity {
         this.eyes.pixels[3].freeFoodSignal
           ? this.eyes.pixels[3].freeFoodSignal
           : 0,
-        this.acceleration,
+        this.acceleration / 10,
         this.energy / this.attributes.maxEnergy / 2,
       ];
       const output = this.brain.calculate();
-      if (output[0] > 0.5) {
+      if (output[0] > 0.2) {
         this.rotateRight(output[0]);
       }
-      if (output[1] > 0.5) {
+      if (output[1] > 0.2) {
         this.rotateLeft(output[1]);
       }
       if (output[2] > 0.5) {
         this.accelerate((output[2] - 0.5) * 2);
       }
-      if (output[3] > 0.9) {
+      if (output[3] > 0.5) {
         this.isAggresive = true;
       } else {
         this.isAggresive = false;
@@ -247,9 +265,7 @@ export class Organism extends Entity {
             this.timeAlive +
             " making: " +
             this.children +
-            " offspring" +
-            " with energy:" +
-            this.energy
+            " offspring"
         );
       } else {
         this.kill(
@@ -263,7 +279,7 @@ export class Organism extends Entity {
         );
       }
     }
-
+    this.regenerateHealth();
     this.updatePosition();
     this.updateSpeed();
     this.updateAcceleration();
@@ -272,18 +288,18 @@ export class Organism extends Entity {
   }
 
   public rotateLeft(value: number) {
-    this.rotation -= 0.05 * value * this.attributes.rotationMultiplier;
+    this.rotation -= value * this.attributes.rotationMultiplier;
     this.acceleration = 0;
   }
 
   public rotateRight(value: number) {
-    this.rotation += 0.05 * value * this.attributes.rotationMultiplier;
+    this.rotation += value * this.attributes.rotationMultiplier;
     this.acceleration = 0;
   }
 
   public accelerate(value: number) {
-    this.acceleration += 0.0001 * this.attributes.speedMultiplier * value;
-    this.energy -= this.attributes.moveDrain * 0.001 * value;
+    this.acceleration += this.attributes.speedMultiplier * value;
+    this.energy -= this.attributes.moveDrain * 0.0001 * value;
   }
 
   private updateMultiplyingRediness() {
@@ -309,7 +325,7 @@ export class Organism extends Entity {
     newGenes.mutate(mutateFactor);
     const newOrganism = new Organism(newBrain, newGenes);
     let x = 1;
-    this.hasMouth ? (x = 1) : (x = 5);
+    this.hasMouth ? (x = 3) : (x = Math.random() * 25);
     newOrganism.mesh.position.set(
       this.mesh.position.x + Math.random() * x - x / 2,
       this.mesh.position.y + Math.random() * x - x / 2,
@@ -323,6 +339,29 @@ export class Organism extends Entity {
     newOrganism.rotation = this.rotation;
     newOrganism.isDead = false;
     return newOrganism;
+  }
+
+  public attack(): number {
+    this.energy -= this.attributes.attack / 10;
+    return this.attributes.attack;
+  }
+
+  public takeDamage(damage: number): void {
+    const dmg = damage - this.attributes.defense;
+
+    if (dmg > 0) {
+      this.hp -= dmg;
+    } else {
+      this.hp -= 1;
+    }
+  }
+
+  public regenerateHealth(): void {
+    if (this.hp >= this.attributes.maxHP) {
+      return;
+    }
+    this.energy -= this.attributes.regeneration;
+    this.hp += this.attributes.regeneration / 10;
   }
 
   public kill(text: string) {

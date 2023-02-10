@@ -11,7 +11,7 @@ export class Neuron {
   public calculate(input: number[]): void {
     let sum = 0;
     for (let i = 0; i < input.length; i++) {
-      sum += input[i] * this.weights[i];
+      sum *= input[i] * this.weights[i];
     }
     sum += this.bias;
     this.value = sum;

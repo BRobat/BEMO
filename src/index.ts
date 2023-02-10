@@ -16,7 +16,7 @@ let renderer = new THREE.WebGLRenderer();
 let tick = 1;
 let meanScore = 0;
 let genDuration = 10;
-const mapSize = 100;
+const mapSize = 150;
 
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
