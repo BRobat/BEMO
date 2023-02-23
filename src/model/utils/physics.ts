@@ -63,7 +63,8 @@ export class Physics {
         if (Physics.collisionDetection(e1, es[i])) {
           if (es[i] instanceof Organism) {
             if (e1.isAggresive && e1 != es[i]) {
-              e1.speed = new Vector3(0, 0, 0);
+              // TODO: later multiply by difference in masses or smth
+              e1.speed = e1.speed.multiplyScalar(0.5);
               const org = es[i] as Organism;
               const dmg = e1.attack();
               org.takeDamage(dmg);

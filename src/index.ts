@@ -10,6 +10,7 @@ let camera = new THREE.PerspectiveCamera(
   0.1,
   1000
 );
+let chosenOrg = 100;
 
 let renderer = new THREE.WebGLRenderer();
 
@@ -27,6 +28,7 @@ element.style.setProperty("position", "absolute");
 element.style.setProperty("top", "0");
 element.style.setProperty("left", "0");
 element.style.setProperty("color", "white");
+element.style.setProperty("background-color", "rgba(0,0,0,0.5)");
 document.body.appendChild(element);
 
 let cube = new THREE.Mesh(
@@ -70,7 +72,7 @@ data.energyPacks.forEach((energyPack) => {
 
 camera.position.z = 200;
 
-setInterval(() => {}, 10000);
+// setInterval(() => {}, 10000);
 
 function updateLabel() {
   let energy = 0;
@@ -82,12 +84,35 @@ function updateLabel() {
     data.aliveOrganisms
   } \n Dead matter: ${
     data.energyPacks.filter((e) => e.isActive).length
-  }\n Total energy: ${Math.floor(energy)}`;
+  }\n Total energy: ${Math.floor(energy)}
+  \n selected organism:
+ HP: ${Math.round(data.organisms[chosenOrg].hp)} / ${Math.round(
+    data.organisms[chosenOrg].attributes.maxHP
+  )}
+ energy: ${Math.round(data.organisms[chosenOrg].energy)} / ${Math.round(
+    data.organisms[chosenOrg].attributes.maxEnergy
+  )}
+ speed: ${
+   Math.round(
+     data.organisms[chosenOrg].speed.distanceTo(new THREE.Vector3(0, 0, 0)) *
+       100
+   ) / 100
+ }
+ attackStrength: ${Math.round(data.organisms[chosenOrg].attributes.attack)}
+  defense: ${Math.round(data.organisms[chosenOrg].attributes.defense)}
+  isAggresive: ${data.organisms[chosenOrg].isAggresive}
+
+
+  
+  `;
 }
 
 function animate() {
   requestAnimationFrame(animate);
   data.updateOrganisms();
+  camera.position.x = data.organisms[chosenOrg].mesh.position.x;
+  camera.position.y = data.organisms[chosenOrg].mesh.position.y;
+
   // if (tick % genDuration === 0) {
   //     nextGeneration();
   //     tick = 1;
@@ -114,9 +139,11 @@ addEventListener("keydown", (event) => {
       break;
     case "ArrowUp":
       camera.position.y += 5;
+      chosenOrg += 1;
       break;
     case "ArrowDown":
       camera.position.y -= 5;
+      chosenOrg -= 1;
       break;
     case "a":
       camera.position.z += 10;

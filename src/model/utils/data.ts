@@ -16,10 +16,10 @@ export class Data {
   public brains: Brain[] = [];
   public bestScore: number = 0;
 
-  public batchSize: number = 2000;
+  public batchSize: number = 3000;
 
   public aliveOrganisms: number = 0;
-  public sunEnergy: number = 0.04;
+  public sunEnergy: number = 0.5;
 
   hashThreshold: number;
 
@@ -28,7 +28,7 @@ export class Data {
   constructor(private mapSize: number) {
     this.hashThreshold = 10;
     this.initBrains();
-    this.initOrganisms(1000);
+    this.initOrganisms(2000);
     this.initEnergyPacks();
   }
 
@@ -54,8 +54,8 @@ export class Data {
       const pos = org.mesh.position.clone();
       const energy = org.energy;
       org.update();
-      if (!deadStatus && org.isDead && energy > 0) {
-        this.addEnergyPack(pos, energy);
+      if (!deadStatus && org.isDead) {
+        this.addEnergyPack(pos, energy + org.attributes.maxHP);
       }
     });
     this.getOffsprings();
@@ -116,11 +116,15 @@ export class Data {
   }
 
   private getOffsprings() {
+    const canSpawnPlankton = this.getPlanktonNumber() > 1000;
     this.organisms.forEach((org) => {
       if (
         !org.isDead &&
         org.isReadytoMultiply &&
-        this.aliveOrganisms < this.batchSize
+        ((!org.hasMouth &&
+          this.aliveOrganisms < this.batchSize &&
+          canSpawnPlankton) ||
+          (org.hasMouth && this.aliveOrganisms < this.batchSize))
       ) {
         let n = this.organisms.find((org) => org.isDead);
         if (n == null) {
@@ -138,6 +142,10 @@ export class Data {
     });
   }
 
+  private getPlanktonNumber(): number {
+    return this.organisms.filter((org) => org.hasMouth).length;
+  }
+
   private hashEntities() {
     HashUtils.hashEntities(this, this.hashThreshold);
   }
@@ -148,7 +156,7 @@ export class Data {
 
   private initBrains() {
     for (let i = 0; i < this.batchSize; i++) {
-      this.brains.push(new Brain(14, 56, 4));
+      this.brains.push(new Brain(14, 14, 4));
     }
   }
 
@@ -242,7 +250,7 @@ export class Data {
     if (this.aliveOrganisms <= this.batchSize / 10) {
       const i = Math.floor(Math.random() * this.batchSize);
       if (this.organisms[i].isDead) {
-        this.organisms[i].brain = new Brain(14, 56, 4);
+        this.organisms[i].brain = new Brain(14, 14, 4);
         this.organisms[i].isDead = false;
         this.organisms[i].energy = 290;
         this.organisms[i].attributes.lifespan = 500;
@@ -266,16 +274,16 @@ export class Data {
   teleportOrganisms() {
     this.organisms.forEach((org) => {
       if (org.mesh.position.x > this.mapSize / 2) {
-        org.mesh.position.x = -this.mapSize / 2;
+        org.mesh.position.x -= this.mapSize;
       }
       if (org.mesh.position.x < -this.mapSize / 2) {
-        org.mesh.position.x = this.mapSize / 2;
+        org.mesh.position.x += this.mapSize;
       }
       if (org.mesh.position.y > this.mapSize / 2) {
-        org.mesh.position.y = -this.mapSize / 2;
+        org.mesh.position.y -= this.mapSize;
       }
       if (org.mesh.position.y < -this.mapSize / 2) {
-        org.mesh.position.y = this.mapSize / 2;
+        org.mesh.position.y += this.mapSize;
       }
     });
     this.energyPacks.forEach((org) => {

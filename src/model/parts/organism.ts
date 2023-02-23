@@ -1,5 +1,6 @@
 import * as THREE from "three";
-import { Vector3 } from "three";
+import { BufferGeometry, Vector3 } from "three";
+import * as BufferGeometryUtils from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { Brain } from "../ml/brain";
 import { Eye } from "./eye";
 import { Genome } from "./genome";
@@ -84,10 +85,27 @@ export class Organism extends Entity {
 
     if (genome.words[7] > 0.5) {
       this.hasMouth = false;
-      this.geometry = new THREE.IcosahedronGeometry(0.2, 2);
+      this.geometry = new THREE.IcosahedronGeometry(
+        genome.words[9] * genome.words[6] * 0.3 + 0.1,
+        2
+      );
     } else {
       this.hasMouth = true;
-      this.geometry = new THREE.CapsuleGeometry(0.1, 0.2, 4, 8);
+      const geo1 = new THREE.CapsuleGeometry(
+        genome.words[9] * genome.words[6] * 0.1 + 0.1,
+        genome.words[2] * 0.3 + 0.1,
+        4,
+        8
+      );
+      const geo2 = new THREE.CapsuleGeometry(
+        genome.words[11] * 0.1 + 0.1,
+        genome.words[11] * 0.1 + 0.1,
+        4,
+        8
+      );
+      geo2.translate(0, genome.words[11] * 0.1, 0);
+      // this.geometry = new BufferGeometry();
+      this.geometry = BufferGeometryUtils.mergeBufferGeometries([geo1, geo2]);
     }
 
     this.material = new THREE.MeshBasicMaterial({
@@ -250,7 +268,7 @@ export class Organism extends Entity {
       if (output[2] > 0.5) {
         this.accelerate((output[2] - 0.5) * 2);
       }
-      if (output[3] > 0.5) {
+      if (output[3] > 0.3) {
         this.isAggresive = true;
       } else {
         this.isAggresive = false;
@@ -299,14 +317,14 @@ export class Organism extends Entity {
 
   public accelerate(value: number) {
     this.acceleration += this.attributes.speedMultiplier * value;
-    this.energy -= this.attributes.moveDrain * 0.0001 * value;
+    this.energy -= this.attributes.moveDrain * 0.001 * Math.pow(value, 2);
   }
 
   private updateMultiplyingRediness() {
     let x = 0.99;
     this.hasMouth ? (x = 0.99) : (x = 0.998);
     if (
-      this.energy > this.attributes.baseEnergy * 3 &&
+      this.energy > this.attributes.baseEnergy * 3 + this.attributes.maxHP &&
       this.timeAlive > this.attributes.multiplyAge &&
       Math.random() > x
     ) {
@@ -318,7 +336,6 @@ export class Organism extends Entity {
 
   public getOffspring(mutateFactor: number): Organism {
     this.children++;
-    this.energy -= this.attributes.baseEnergy * 2;
     const newBrain = this.brain.copy();
     const newGenes = this.genome.copy();
     newBrain.mutate(mutateFactor);
@@ -338,11 +355,12 @@ export class Organism extends Entity {
     );
     newOrganism.rotation = this.rotation;
     newOrganism.isDead = false;
+    this.energy -= this.attributes.baseEnergy * 2 + newOrganism.hp;
     return newOrganism;
   }
 
   public attack(): number {
-    this.energy -= this.attributes.attack / 10;
+    this.energy -= this.attributes.attack / 1000;
     return this.attributes.attack;
   }
 
@@ -350,7 +368,7 @@ export class Organism extends Entity {
     const dmg = damage - this.attributes.defense;
 
     if (dmg > 0) {
-      this.hp -= dmg;
+      this.hp -= dmg / 10;
     } else {
       this.hp -= 1;
     }
@@ -361,7 +379,7 @@ export class Organism extends Entity {
       return;
     }
     this.energy -= this.attributes.regeneration;
-    this.hp += this.attributes.regeneration / 10;
+    this.hp += this.attributes.regeneration / 100;
   }
 
   public kill(text: string) {
