@@ -19,7 +19,7 @@ export class Data {
   public batchSize: number = 3000;
 
   public aliveOrganisms: number = 0;
-  public sunEnergy: number = 0.5;
+  public sunEnergy: number = 0.2;
 
   hashThreshold: number;
 
@@ -135,7 +135,7 @@ export class Data {
         if (Math.random() > 0.99) {
           newOrganism = org.getOffspring(0.3);
         } else {
-          newOrganism = org.getOffspring(0.01);
+          newOrganism = org.getOffspring(0.05);
         }
         n.copyParameters(newOrganism);
       }
@@ -156,7 +156,7 @@ export class Data {
 
   private initBrains() {
     for (let i = 0; i < this.batchSize; i++) {
-      this.brains.push(new Brain(14, 14, 4));
+      this.brains.push(new Brain(14, 10, 4));
     }
   }
 
@@ -221,6 +221,8 @@ export class Data {
           Math.random(),
           Math.random(),
           Math.random(),
+          Math.random(),
+          Math.random(),
         ])
       );
       this.organisms.push(newOrganism);
@@ -250,7 +252,7 @@ export class Data {
     if (this.aliveOrganisms <= this.batchSize / 10) {
       const i = Math.floor(Math.random() * this.batchSize);
       if (this.organisms[i].isDead) {
-        this.organisms[i].brain = new Brain(14, 14, 4);
+        this.organisms[i].brain = new Brain(14, 10, 4);
         this.organisms[i].isDead = false;
         this.organisms[i].energy = 290;
         this.organisms[i].attributes.lifespan = 500;

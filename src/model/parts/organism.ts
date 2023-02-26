@@ -6,6 +6,8 @@ import { Eye } from "./eye";
 import { Genome } from "./genome";
 import { MaxAttributes } from "../consts/maxAttributes";
 import { Entity } from "./entity";
+import { Neuron } from "../ml/neuron";
+import { firstNames, lastNames } from "../consts/names";
 
 export class OrganismAttributes {
   public speedMultiplier: number;
@@ -33,6 +35,8 @@ export class Organism extends Entity {
   public acceleration: number;
   public speed: THREE.Vector3;
   public brain: Brain;
+
+  public name: string = "";
 
   public isDead: boolean = true;
   public timeAlive = 0;
@@ -82,6 +86,10 @@ export class Organism extends Entity {
 
     const g = Math.floor(genome.words[7] * 250);
     const b = Math.floor(genome.words[4] * 200) + 50;
+
+    this.name =
+      firstNames[Math.floor(genome.words[14] * firstNames.length)] +
+      lastNames[Math.floor(genome.words[15] * lastNames.length)];
 
     if (genome.words[7] > 0.5) {
       this.hasMouth = false;
@@ -255,17 +263,22 @@ export class Organism extends Entity {
         this.eyes.pixels[3].freeFoodSignal
           ? this.eyes.pixels[3].freeFoodSignal
           : 0,
-        this.acceleration / 10,
-        this.energy / this.attributes.maxEnergy / 2,
+        0,
+        0,
+        // this.acceleration / 10,
+        // this.energy / this.attributes.maxEnergy / 2,
       ];
       const output = this.brain.calculate();
+      this.brain.outputs.forEach((o: Neuron, i) => {
+        o.value = output[i];
+      });
       if (output[0] > 0.2) {
         this.rotateRight(output[0]);
       }
       if (output[1] > 0.2) {
         this.rotateLeft(output[1]);
       }
-      if (output[2] > 0.5) {
+      if (output[2] > 0.3) {
         this.accelerate((output[2] - 0.5) * 2);
       }
       if (output[3] > 0.3) {
@@ -276,33 +289,41 @@ export class Organism extends Entity {
     }
   }
   public update(): void {
-    if (this.timeAlive > this.attributes.lifespan || this.energy <= 0) {
-      if (this.energy <= 0) {
-        this.kill(
-          "died of starvation at age: " +
-            this.timeAlive +
-            " making: " +
-            this.children +
-            " offspring"
-        );
-      } else {
-        this.kill(
-          "died of old age: " +
-            this.timeAlive +
-            " making: " +
-            this.children +
-            " offspring" +
-            " with energy:" +
-            this.energy
-        );
-      }
+    if (this.energy <= 0) {
+      this.kill(
+        "died of starvation at age: " +
+          this.timeAlive +
+          " making: " +
+          this.children +
+          " offspring"
+      );
+    } else if (this.hp <= 0) {
+      this.kill(
+        "died of wounds at age: " +
+          this.timeAlive +
+          " making: " +
+          this.children +
+          " offspring"
+      );
+    } else if (this.timeAlive > this.attributes.lifespan) {
+      this.kill(
+        "died of old age: " +
+          this.timeAlive +
+          " making: " +
+          this.children +
+          " offspring" +
+          " with energy:" +
+          this.energy
+      );
     }
+
     this.regenerateHealth();
     this.updatePosition();
     this.updateSpeed();
     this.updateAcceleration();
     this.updateBrain();
     this.updateMultiplyingRediness();
+    this.eyes.reset();
   }
 
   public rotateLeft(value: number) {
@@ -360,7 +381,7 @@ export class Organism extends Entity {
   }
 
   public attack(): number {
-    this.energy -= this.attributes.attack / 1000;
+    this.energy -= this.attributes.attack / 500;
     return this.attributes.attack;
   }
 
@@ -379,7 +400,7 @@ export class Organism extends Entity {
       return;
     }
     this.energy -= this.attributes.regeneration;
-    this.hp += this.attributes.regeneration / 100;
+    this.hp += this.attributes.regeneration / 10;
   }
 
   public kill(text: string) {

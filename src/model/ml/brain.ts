@@ -14,14 +14,14 @@ export class Brain {
       for (let j = 0; j < inputsNo; j++) {
         n.push(Math.random());
       }
-      this.hidden.push(new Neuron(n, Math.random()));
+      this.hidden.push(new Neuron(n, Math.random() / 2));
     }
     for (let i = 0; i < outputsNo; i++) {
       const n: number[] = [];
       for (let j = 0; j < hiddenNo; j++) {
         n.push(Math.random());
       }
-      this.outputs.push(new Neuron(n, Math.random()));
+      this.outputs.push(new Neuron(n, Math.random() / 2));
     }
   }
 

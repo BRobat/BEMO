@@ -50,6 +50,7 @@ export class Eye {
     this.pixels.forEach((pixel) => {
       pixel.positiveSignal = 0;
       pixel.negativeSignal = 0;
+      pixel.freeFoodSignal = 0;
     });
   }
 }

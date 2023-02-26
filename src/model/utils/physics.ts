@@ -33,28 +33,36 @@ export class Physics {
       indexes = [...new Set(indexes)];
 
       let distance = e1.attributes.eyeSight;
-      let target: Entity;
       indexes.forEach((i: number) => {
-        const org = es[i] as Organism;
-        const newDistance = e1.mesh.position.distanceTo(org.mesh.position);
+        if (es[i] instanceof Organism && es[i] == e1) {
+          return;
+        }
+        const newDistance = e1.mesh.position.distanceTo(es[i].mesh.position);
         if (newDistance < distance) {
-          target = org;
-          if (target instanceof Organism) {
+          const w = new Vector3(0, 1, 0).applyAxisAngle(
+            new Vector3(0, 0, 1),
+            e1.rotation
+          );
+          const cross = new Vector3();
+          cross.crossVectors(w, es[i].mesh.position);
+          const direction = Math.sign(cross.z);
+          const angle = w.angleTo(es[i].mesh.position);
+
+          let positiveAngle = direction * angle + Math.PI;
+          if (positiveAngle > Math.PI * 2) {
+            positiveAngle -= Math.PI * 2;
+          } else if (positiveAngle < 0) {
+            positiveAngle += Math.PI * 2;
+          }
+
+          if (es[i] instanceof Organism) {
             e1.eyes.hit(
-              distance,
-              e1.genome.getUnSimilarityTo(target.genome),
-              new Vector3(1, 0, 0)
-                .applyAxisAngle(new Vector3(0, 0, 1), -e1.rotation)
-                .angleTo(target.mesh.position)
+              newDistance,
+              e1.genome.getUnSimilarityTo((es[i] as Organism).genome),
+              positiveAngle
             );
           } else {
-            e1.eyes.hit(
-              distance,
-              0,
-              new Vector3(1, 0, 0)
-                .applyAxisAngle(new Vector3(0, 0, 1), -e1.rotation)
-                .angleTo(target.mesh.position)
-            );
+            e1.eyes.hit(newDistance, 0, positiveAngle);
           }
         }
       });
@@ -68,9 +76,6 @@ export class Physics {
               const org = es[i] as Organism;
               const dmg = e1.attack();
               org.takeDamage(dmg);
-              if (org.hp <= 0) {
-                org.kill("killed");
-              }
             }
           } else {
             const energy = es[i] as EnergyPack;
