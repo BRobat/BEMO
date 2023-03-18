@@ -102,7 +102,7 @@ function updateLabel() {
  }
  attackStrength: ${Math.round(data.organisms[chosenOrg].attributes.attack)}
   defense: ${Math.round(data.organisms[chosenOrg].attributes.defense)}
-  isAggresive: ${data.organisms[chosenOrg].isAggresive}
+  Type: ${data.organisms[chosenOrg].type}
   sight: ${Math.round(data.organisms[chosenOrg].attributes.eyeSight)}
 
  

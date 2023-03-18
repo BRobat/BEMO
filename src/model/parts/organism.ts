@@ -5,7 +5,7 @@ import { Brain } from "../ml/brain";
 import { Eye } from "./eye";
 import { Genome } from "./genome";
 import { MaxAttributes } from "../consts/maxAttributes";
-import { Entity } from "./entity";
+import { Entity, EntityType } from "./entity";
 import { Neuron } from "../ml/neuron";
 import { firstNames, lastNames } from "../consts/names";
 
@@ -28,6 +28,7 @@ export class OrganismAttributes {
   public attack: number;
   public defense: number;
   public brainSpeed: number;
+  public aggresiveness: number;
 }
 
 export class Organism extends Entity {
@@ -42,7 +43,6 @@ export class Organism extends Entity {
   public timeAlive = 0;
   private children: number = 0;
   public genome: Genome;
-  public hasMouth: boolean = true;
 
   public isReadytoMultiply = false;
   public isAggresive = false;
@@ -73,32 +73,33 @@ export class Organism extends Entity {
   private initByGenome(genome: Genome): void {
     // TODO: colors and appearance should be moved to separate class - also change how material is created to show different genes
 
-    let r =
-      Math.floor(genome.words[6] * 100) +
-      Math.floor(genome.words[1] * 100) -
-      Math.floor(genome.words[7] * 200) +
-      50;
-    if (r < 0) {
-      r = 0;
-    } else if (r > 255) {
-      r = 255;
-    }
+    this.setOrganismType(genome);
+    let r = Math.floor(genome.words[6] * 100);
+    let g = Math.floor(genome.words[7] * 100);
+    let b = Math.floor(genome.words[4] * 100);
 
-    const g = Math.floor(genome.words[7] * 250);
-    const b = Math.floor(genome.words[4] * 200) + 50;
+    if (this.type == EntityType.A) {
+      g += 150;
+    } else if (this.type == EntityType.D) {
+      r += 150;
+    } else if (this.type == EntityType.B) {
+      b += 100;
+      g + 100;
+    } else if (this.type == EntityType.C) {
+      r += 100;
+      b + 100;
+    }
 
     this.name =
       firstNames[Math.floor(genome.words[14] * firstNames.length)] +
       lastNames[Math.floor(genome.words[15] * lastNames.length)];
 
-    if (genome.words[7] > 0.5) {
-      this.hasMouth = false;
+    if (this.type == EntityType.A) {
       this.geometry = new THREE.IcosahedronGeometry(
         genome.words[9] * genome.words[6] * 0.3 + 0.1,
         2
       );
     } else {
-      this.hasMouth = true;
       const geo1 = new THREE.CapsuleGeometry(
         genome.words[9] * genome.words[6] * 0.1 + 0.1,
         genome.words[2] * 0.3 + 0.1,
@@ -187,6 +188,23 @@ export class Organism extends Entity {
     this.eyes = new Eye(Math.PI * 2, 4, this.attributes.alertness);
   }
 
+  private setOrganismType(genome: Genome): void {
+    const x = genome.words[7]; // x
+    const y = genome.words[13]; // y
+    const k = Math.pow(Math.E, x) - x - 1;
+    const l = Math.pow(Math.E, x) - 0.2 * x - 1;
+    const m = Math.pow(Math.E, x) - 1 + 2 * Math.pow(x, 2);
+    if (y < k) {
+      this.type = EntityType.A;
+    } else if (y < l) {
+      this.type = EntityType.B;
+    } else if (y < m) {
+      this.type = EntityType.C;
+    } else {
+      this.type = EntityType.D;
+    }
+  }
+
   private updatePosition(): void {
     if (this.isDead) {
       this.eyes.reset();
@@ -225,7 +243,7 @@ export class Organism extends Entity {
     }
     this.brainTick = 0;
     this.energy -= this.attributes.energyDrain;
-    if (this.hasMouth) {
+    if (this.type !== EntityType.A) {
       this.brain.inputs = [
         this.eyes.pixels[0].negativeSignal
           ? this.eyes.pixels[0].negativeSignal
@@ -233,8 +251,8 @@ export class Organism extends Entity {
         this.eyes.pixels[0].positiveSignal
           ? this.eyes.pixels[0].positiveSignal
           : 0,
-        this.eyes.pixels[0].freeFoodSignal
-          ? this.eyes.pixels[0].freeFoodSignal
+        this.eyes.pixels[0].neutralSignal
+          ? this.eyes.pixels[0].neutralSignal
           : 0,
         this.eyes.pixels[1].negativeSignal
           ? this.eyes.pixels[1].negativeSignal
@@ -242,8 +260,8 @@ export class Organism extends Entity {
         this.eyes.pixels[1].positiveSignal
           ? this.eyes.pixels[1].positiveSignal
           : 0,
-        this.eyes.pixels[1].freeFoodSignal
-          ? this.eyes.pixels[1].freeFoodSignal
+        this.eyes.pixels[1].neutralSignal
+          ? this.eyes.pixels[1].neutralSignal
           : 0,
         this.eyes.pixels[2].negativeSignal
           ? this.eyes.pixels[2].negativeSignal
@@ -251,8 +269,8 @@ export class Organism extends Entity {
         this.eyes.pixels[2].positiveSignal
           ? this.eyes.pixels[2].positiveSignal
           : 0,
-        this.eyes.pixels[2].freeFoodSignal
-          ? this.eyes.pixels[2].freeFoodSignal
+        this.eyes.pixels[2].neutralSignal
+          ? this.eyes.pixels[2].neutralSignal
           : 0,
         this.eyes.pixels[3].negativeSignal
           ? this.eyes.pixels[3].negativeSignal
@@ -260,8 +278,8 @@ export class Organism extends Entity {
         this.eyes.pixels[3].positiveSignal
           ? this.eyes.pixels[3].positiveSignal
           : 0,
-        this.eyes.pixels[3].freeFoodSignal
-          ? this.eyes.pixels[3].freeFoodSignal
+        this.eyes.pixels[3].neutralSignal
+          ? this.eyes.pixels[3].neutralSignal
           : 0,
         0,
         0,
@@ -343,7 +361,7 @@ export class Organism extends Entity {
 
   private updateMultiplyingRediness() {
     let x = 0.99;
-    this.hasMouth ? (x = 0.99) : (x = 0.998);
+    this.type !== EntityType.A ? (x = 0.99) : (x = 0.998);
     if (
       this.energy > this.attributes.baseEnergy * 3 + this.attributes.maxHP &&
       this.timeAlive > this.attributes.multiplyAge &&
@@ -363,7 +381,7 @@ export class Organism extends Entity {
     newGenes.mutate(mutateFactor);
     const newOrganism = new Organism(newBrain, newGenes);
     let x = 1;
-    this.hasMouth ? (x = 3) : (x = Math.random() * 25);
+    this.type !== EntityType.A ? (x = 3) : (x = Math.random() * 25);
     newOrganism.mesh.position.set(
       this.mesh.position.x + Math.random() * x - x / 2,
       this.mesh.position.y + Math.random() * x - x / 2,
@@ -409,7 +427,7 @@ export class Organism extends Entity {
     }
     console.log(text);
     this.isDead = true;
-    this.mesh.position.set(1000, 1000, 0);
+    this.mesh.position.set(10000, 10000, 0);
   }
 
   public addEnergy(energy: number) {

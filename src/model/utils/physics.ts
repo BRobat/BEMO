@@ -1,12 +1,8 @@
 import { Vector3, Triangle } from "three";
 import { Organism } from "../parts/organism";
-import { Obstacle } from "../parts/obstacle";
-import { Entity } from "../parts/entity";
-import { Eye, Pixel } from "../parts/eye";
-import { MathFunctions } from "./math";
-import { EnergyPack } from "../parts/energyPack";
+import { Entity, EntityType } from "../parts/entity";
 import { HashUtils } from "./hashUtils";
-import { random16 } from "three/src/math/MathUtils";
+import { EntityInteractions } from "./entityInteractions";
 
 export class Physics {
   static collideEntities(
@@ -18,7 +14,7 @@ export class Physics {
       return;
     }
     es.forEach((e1: Entity, j) => {
-      if (!(e1 instanceof Organism) || e1.isDead || !e1.hasMouth) {
+      if (!(e1 instanceof Organism) || e1.isDead || e1.type == EntityType.A) {
         return;
       }
       const eHash = HashUtils.getEntityHash(e1, hashThreshold);
@@ -49,46 +45,29 @@ export class Physics {
           const angle = w.angleTo(es[i].mesh.position);
 
           let positiveAngle = direction * angle + Math.PI;
+          if (positiveAngle === undefined) {
+            positiveAngle = 0;
+          }
           if (positiveAngle > Math.PI * 2) {
             positiveAngle -= Math.PI * 2;
           } else if (positiveAngle < 0) {
             positiveAngle += Math.PI * 2;
           }
 
-          if (es[i] instanceof Organism) {
-            e1.eyes.hit(
-              newDistance,
-              e1.genome.getUnSimilarityTo((es[i] as Organism).genome),
-              positiveAngle
-            );
-          } else {
-            e1.eyes.hit(newDistance, 0, positiveAngle);
-          }
+          e1.eyes.hit(newDistance, e1.type, es[i].type, positiveAngle);
         }
       });
 
       indexes.forEach((i: number) => {
         if (Physics.collisionDetection(e1, es[i])) {
-          if (es[i] instanceof Organism) {
-            if (e1.isAggresive && e1 != es[i]) {
-              // TODO: later multiply by difference in masses or smth
-              e1.speed = e1.speed.multiplyScalar(0.5);
-              const org = es[i] as Organism;
-              const dmg = e1.attack();
-              org.takeDamage(dmg);
-            }
-          } else {
-            const energy = es[i] as EnergyPack;
-            e1.addEnergy(energy.energy);
-            energy.deactivate();
-          }
+          EntityInteractions.interact(e1, es[i]);
         }
       });
     });
   }
 
   static collisionDetection(e1: Entity, es: Entity) {
-    if (e1.mesh.position.distanceTo(es.mesh.position) <= 0.3) {
+    if (e1.mesh.position.distanceTo(es.mesh.position) <= 0.3 && e1 != es) {
       return true;
     } else {
       return false;

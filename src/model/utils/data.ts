@@ -4,7 +4,7 @@ import { Physics } from "./physics";
 import { EnergyPack } from "../parts/energyPack";
 import { Brain } from "../ml/brain";
 import { Genome } from "../parts/genome";
-import { Entity } from "../parts/entity";
+import { Entity, EntityType } from "../parts/entity";
 import { HashUtils } from "./hashUtils";
 
 export class Data {
@@ -77,7 +77,7 @@ export class Data {
     this.hashList.forEach((value, key) => {
       const entities = value.map((index) => this.entities[index]);
       const plants = entities.filter(
-        (entity) => entity instanceof Organism && !entity.hasMouth
+        (entity) => entity instanceof Organism && !(entity.type == EntityType.A)
       ) as Organism[];
       if (plants.length > 0) {
         const energy = this.sunEnergy / plants.length;
@@ -121,10 +121,10 @@ export class Data {
       if (
         !org.isDead &&
         org.isReadytoMultiply &&
-        ((!org.hasMouth &&
+        ((!(org.type == EntityType.A) &&
           this.aliveOrganisms < this.batchSize &&
           canSpawnPlankton) ||
-          (org.hasMouth && this.aliveOrganisms < this.batchSize))
+          (org.type == EntityType.A && this.aliveOrganisms < this.batchSize))
       ) {
         let n = this.organisms.find((org) => org.isDead);
         if (n == null) {
@@ -143,7 +143,7 @@ export class Data {
   }
 
   private getPlanktonNumber(): number {
-    return this.organisms.filter((org) => org.hasMouth).length;
+    return this.organisms.filter((org) => org.type == EntityType.A).length;
   }
 
   private hashEntities() {
@@ -214,6 +214,7 @@ export class Data {
           Math.random(),
           Math.random(),
           Math.random(),
+          Math.random() + 0.5,
           Math.random(),
           Math.random(),
           Math.random(),

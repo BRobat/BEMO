@@ -1,8 +1,9 @@
+import { EntityType } from "./entity";
+
 export class Pixel {
-  // TODO: rework this so that the organism could differeciate between races.
   positiveSignal: number = 0;
   negativeSignal: number = 0;
-  freeFoodSignal: number = 0;
+  neutralSignal: number = 0;
 }
 
 export class Eye {
@@ -16,18 +17,66 @@ export class Eye {
     }
   }
 
-  hit(distance: number, genomeDistance: number, angle: number) {
+  hit(distance: number, ownType: string, hitType: string, angle: number) {
     const pixel = this.determinePixel(angle);
     // TODO: check pixelSignal function
-    if (genomeDistance > 1) {
+
+    let isNegativeNeutralPositive = 0;
+
+    switch (ownType) {
+      case EntityType.A:
+        // nothing happens here
+        break;
+      case EntityType.B:
+        if (hitType === EntityType.A) {
+          isNegativeNeutralPositive = 2;
+        } else if (hitType === EntityType.B) {
+          isNegativeNeutralPositive = 1;
+        } else if (hitType === EntityType.C) {
+          isNegativeNeutralPositive = 0;
+        } else if (hitType === EntityType.D) {
+          isNegativeNeutralPositive = 0;
+        } else if (hitType === EntityType.EA) {
+          isNegativeNeutralPositive = 2;
+        }
+        break;
+      case EntityType.C:
+        if (hitType === EntityType.A) {
+          isNegativeNeutralPositive = 2;
+        } else if (hitType === EntityType.B) {
+          isNegativeNeutralPositive = 2;
+        } else if (hitType === EntityType.C) {
+          isNegativeNeutralPositive = 1;
+        } else if (hitType === EntityType.D) {
+          isNegativeNeutralPositive = 0;
+        } else if (hitType === EntityType.EA) {
+          isNegativeNeutralPositive = 2;
+        }
+        break;
+      case EntityType.D:
+        if (hitType === EntityType.A) {
+          isNegativeNeutralPositive = 1;
+        } else if (hitType === EntityType.B) {
+          isNegativeNeutralPositive = 2;
+        } else if (hitType === EntityType.C) {
+          isNegativeNeutralPositive = 2;
+        } else if (hitType === EntityType.D) {
+          isNegativeNeutralPositive = 0;
+        } else if (hitType === EntityType.EA) {
+          isNegativeNeutralPositive = 2;
+        }
+        break;
+    }
+
+    if (isNegativeNeutralPositive === 0) {
       pixel.negativeSignal += (1 / distance) * this.alertness;
       if (pixel.negativeSignal > 1) {
         pixel.negativeSignal = 1;
       }
-    } else if (genomeDistance === 0) {
-      pixel.freeFoodSignal += (1 / distance) * this.alertness;
-      if (pixel.freeFoodSignal > 1) {
-        pixel.freeFoodSignal = 1;
+    } else if (isNegativeNeutralPositive === 1) {
+      pixel.neutralSignal += (1 / distance) * this.alertness;
+      if (pixel.neutralSignal > 1) {
+        pixel.neutralSignal = 1;
       }
     } else {
       pixel.positiveSignal += (1 / distance) * this.alertness;
@@ -50,7 +99,7 @@ export class Eye {
     this.pixels.forEach((pixel) => {
       pixel.positiveSignal = 0;
       pixel.negativeSignal = 0;
-      pixel.freeFoodSignal = 0;
+      pixel.neutralSignal = 0;
     });
   }
 }

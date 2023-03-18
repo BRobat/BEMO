@@ -14,14 +14,16 @@ Some of the rules could be simillar to a rpg game.
 
 ## TODO
 
+- add organims types
+- differentiate organism types in the eye
+- fix eye
+- add two types of energy packs
+- make photosynthesis less effective when theres a lot of energy packs ( or reduce the likeness of multiplying)
 - combine geometries to create more complex bodies
 - rework photosynthesis to not stop organism from moving
-- rework eating - differentiate makro and energy
-- producters could spit energy packs
 - rework lifespan
 - add walls
 - add memory to the brain
-- Maybe give genome a direction in some ways that organisms could have it easier to decide what to do
 - make brain resizable
 - add reload button
 - add a way to save and load organisms
