@@ -1,5 +1,5 @@
 export class MaxAttributes {
-  static LIFESPAN: number = 300000;
+  static LIFESPAN: number = 10000;
   static BASE_ENERGY: number = 200;
   static MAX_ENERGY: number = 2000;
   static SPEED_MULTIPLIER: number = 1;

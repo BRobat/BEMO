@@ -14,9 +14,6 @@ Some of the rules could be simillar to a rpg game.
 
 ## TODO
 
-- add organims types
-- differentiate organism types in the eye
-- fix eye
 - add two types of energy packs
 - make photosynthesis less effective when theres a lot of energy packs ( or reduce the likeness of multiplying)
 - combine geometries to create more complex bodies

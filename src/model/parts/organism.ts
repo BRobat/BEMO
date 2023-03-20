@@ -166,10 +166,7 @@ export class Organism extends Entity {
       MaxAttributes.ROTATION_MULTIPLIER *
       Math.pow(1 - genome.words[7], 2);
 
-    this.attributes.eyeSight =
-      genome.words[4] *
-      MaxAttributes.EYE_SIGHT *
-      Math.pow(1 - genome.words[7], 2);
+    this.attributes.eyeSight = genome.words[4] * MaxAttributes.EYE_SIGHT;
 
     this.attributes.multiplyAge = genome.words[5] * MaxAttributes.MULTIPLY_AGE;
 
@@ -247,44 +244,40 @@ export class Organism extends Entity {
       this.brain.inputs = [
         this.eyes.pixels[0].negativeSignal
           ? this.eyes.pixels[0].negativeSignal
-          : 0,
+          : -1,
         this.eyes.pixels[0].positiveSignal
           ? this.eyes.pixels[0].positiveSignal
-          : 0,
+          : -1,
         this.eyes.pixels[0].neutralSignal
           ? this.eyes.pixels[0].neutralSignal
-          : 0,
+          : -1,
         this.eyes.pixels[1].negativeSignal
           ? this.eyes.pixels[1].negativeSignal
-          : 0,
+          : -1,
         this.eyes.pixels[1].positiveSignal
           ? this.eyes.pixels[1].positiveSignal
-          : 0,
+          : -1,
         this.eyes.pixels[1].neutralSignal
           ? this.eyes.pixels[1].neutralSignal
-          : 0,
+          : -1,
         this.eyes.pixels[2].negativeSignal
           ? this.eyes.pixels[2].negativeSignal
-          : 0,
+          : -1,
         this.eyes.pixels[2].positiveSignal
           ? this.eyes.pixels[2].positiveSignal
-          : 0,
+          : -1,
         this.eyes.pixels[2].neutralSignal
           ? this.eyes.pixels[2].neutralSignal
-          : 0,
+          : -1,
         this.eyes.pixels[3].negativeSignal
           ? this.eyes.pixels[3].negativeSignal
-          : 0,
+          : -1,
         this.eyes.pixels[3].positiveSignal
           ? this.eyes.pixels[3].positiveSignal
-          : 0,
+          : -1,
         this.eyes.pixels[3].neutralSignal
           ? this.eyes.pixels[3].neutralSignal
-          : 0,
-        0,
-        0,
-        // this.acceleration / 10,
-        // this.energy / this.attributes.maxEnergy / 2,
+          : -1,
       ];
       const output = this.brain.calculate();
       this.brain.outputs.forEach((o: Neuron, i) => {
@@ -297,12 +290,7 @@ export class Organism extends Entity {
         this.rotateLeft(output[1]);
       }
       if (output[2] > 0.3) {
-        this.accelerate((output[2] - 0.5) * 2);
-      }
-      if (output[3] > 0.3) {
-        this.isAggresive = true;
-      } else {
-        this.isAggresive = false;
+        this.accelerate(output[2]);
       }
     }
   }
@@ -355,7 +343,7 @@ export class Organism extends Entity {
   }
 
   public accelerate(value: number) {
-    this.acceleration += this.attributes.speedMultiplier * value;
+    this.acceleration += this.attributes.speedMultiplier * value + 0.01;
     this.energy -= this.attributes.moveDrain * 0.001 * Math.pow(value, 2);
   }
 

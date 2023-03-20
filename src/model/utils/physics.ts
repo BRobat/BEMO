@@ -18,9 +18,9 @@ export class Physics {
         return;
       }
       const eHash = HashUtils.getEntityHash(e1, hashThreshold);
-      const allHashes = HashUtils.getNearHashes(eHash).concat([eHash]);
+      const nearHashes = HashUtils.getNearHashes(eHash).concat([eHash]);
       let indexes: number[] = [];
-      allHashes.forEach((hashKey: string) => {
+      nearHashes.forEach((hashKey: string) => {
         const hash = hashList.get(hashKey);
         if (hash && hash.length !== 0) {
           indexes = indexes.concat(hash);
@@ -35,16 +35,22 @@ export class Physics {
         }
         const newDistance = e1.mesh.position.distanceTo(es[i].mesh.position);
         if (newDistance < distance) {
-          const w = new Vector3(0, 1, 0).applyAxisAngle(
+          const rotationVector = new Vector3(0, 1, 0).applyAxisAngle(
             new Vector3(0, 0, 1),
             e1.rotation
           );
-          const cross = new Vector3();
-          cross.crossVectors(w, es[i].mesh.position);
-          const direction = Math.sign(cross.z);
-          const angle = w.angleTo(es[i].mesh.position);
 
-          let positiveAngle = direction * angle + Math.PI;
+          const relativePosition = new Vector3(
+            (e1.mesh.position.x - es[i].mesh.position.x) / newDistance,
+            (e1.mesh.position.y - es[i].mesh.position.y) / newDistance,
+            0
+          );
+          const cross = new Vector3();
+          cross.crossVectors(rotationVector, relativePosition); // this part is shit
+          const direction = Math.sign(cross.z);
+          const angle = rotationVector.angleTo(relativePosition);
+
+          let positiveAngle = direction * angle;
           if (positiveAngle === undefined) {
             positiveAngle = 0;
           }
@@ -56,9 +62,7 @@ export class Physics {
 
           e1.eyes.hit(newDistance, e1.type, es[i].type, positiveAngle);
         }
-      });
 
-      indexes.forEach((i: number) => {
         if (Physics.collisionDetection(e1, es[i])) {
           EntityInteractions.interact(e1, es[i]);
         }
