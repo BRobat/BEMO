@@ -70,16 +70,19 @@ export class Eye {
 
     if (isNegativeNeutralPositive === 0) {
       pixel.negativeSignal += (1 / distance) * this.alertness;
+      // pixel.negativeSignal += 0.1;
       if (pixel.negativeSignal > 1) {
         pixel.negativeSignal = 1;
       }
     } else if (isNegativeNeutralPositive === 1) {
       pixel.neutralSignal += (1 / distance) * this.alertness;
+      // pixel.neutralSignal += 0.1;
       if (pixel.neutralSignal > 1) {
         pixel.neutralSignal = 1;
       }
     } else {
       pixel.positiveSignal += (1 / distance) * this.alertness;
+      // pixel.positiveSignal += 0.1;
       if (pixel.positiveSignal > 1) {
         pixel.positiveSignal = 1;
       }

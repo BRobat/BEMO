@@ -7,21 +7,21 @@ export class Brain {
 
   constructor(inputsNo: number, hiddenNo: number, outputsNo: number) {
     for (let i = 0; i < inputsNo; i++) {
-      this.inputs.push(Math.random());
+      this.inputs.push();
     }
     for (let i = 0; i < hiddenNo; i++) {
       const n: number[] = [];
       for (let j = 0; j < inputsNo; j++) {
-        n.push(Math.random());
+        n.push(Math.random() - 0.5);
       }
-      this.hidden.push(new Neuron(n, Math.random() / 2));
+      this.hidden.push(new Neuron(n, 0));
     }
     for (let i = 0; i < outputsNo; i++) {
       const n: number[] = [];
       for (let j = 0; j < hiddenNo; j++) {
-        n.push(Math.random());
+        n.push(Math.random() - 0.5);
       }
-      this.outputs.push(new Neuron(n, Math.random() / 2));
+      this.outputs.push(new Neuron(n, 0));
     }
   }
 
@@ -46,16 +46,16 @@ export class Brain {
         if (neuron.weights[index] >= 1) {
           neuron.weights[index] = 1;
         }
-        if (neuron.weights[index] <= 0) {
-          neuron.weights[index] = 0;
+        if (neuron.weights[index] <= -1) {
+          neuron.weights[index] = -1;
         }
       });
       neuron.bias += (Math.random() - 0.5) * evolutionMultiplier;
       if (neuron.bias >= 1) {
         neuron.bias = 1;
       }
-      if (neuron.bias <= 0) {
-        neuron.bias = 0;
+      if (neuron.bias <= -1) {
+        neuron.bias = -1;
       }
     });
     this.outputs.forEach((neuron) => {
@@ -64,16 +64,16 @@ export class Brain {
         if (neuron.weights[index] >= 1) {
           neuron.weights[index] = 1;
         }
-        if (neuron.weights[index] <= 0) {
-          neuron.weights[index] = 0;
+        if (neuron.weights[index] <= -1) {
+          neuron.weights[index] = -1;
         }
       });
       neuron.bias += (Math.random() - 0.5) * evolutionMultiplier;
       if (neuron.bias >= 1) {
         neuron.bias = 1;
       }
-      if (neuron.bias <= 0) {
-        neuron.bias = 0;
+      if (neuron.bias <= -1) {
+        neuron.bias = -1;
       }
     });
   }

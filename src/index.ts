@@ -77,7 +77,9 @@ camera.position.z = 200;
 function updateLabel() {
   let energy = 0;
   data.entities.forEach((entity) => {
-    energy += entity.energy;
+    if (entity instanceof Organism && !entity.isDead) {
+      energy += entity.energy;
+    }
   });
 
   element.innerText = `Tick: ${tick / 10}\n Organisms: ${
@@ -115,26 +117,47 @@ function updateLabel() {
   accel: ${
     Math.round(data.organisms[chosenOrg].brain.outputs[2].value * 100) / 100
   }
-  aggresive: ${
-    Math.round(data.organisms[chosenOrg].brain.outputs[3].value * 100) / 100
+
+  eye1negative: ${
+    Math.floor(100 * data.organisms[chosenOrg].brain.inputs[0]) / 100
+  }
+  eye1positive: ${
+    Math.floor(100 * data.organisms[chosenOrg].brain.inputs[1]) / 100
+  }
+  eye1neutral: ${
+    Math.floor(100 * data.organisms[chosenOrg].brain.inputs[2]) / 100
+  }
+  eye2negative: ${
+    Math.floor(100 * data.organisms[chosenOrg].brain.inputs[3]) / 100
+  }
+  eye2positive: ${
+    Math.floor(100 * data.organisms[chosenOrg].brain.inputs[4]) / 100
+  }
+  eye2neutral: ${
+    Math.floor(100 * data.organisms[chosenOrg].brain.inputs[5]) / 100
+  }
+  eye3negative: ${
+    Math.floor(100 * data.organisms[chosenOrg].brain.inputs[6]) / 100
+  }
+  eye3positive: ${
+    Math.floor(100 * data.organisms[chosenOrg].brain.inputs[7]) / 100
+  }
+  eye3neutral: ${
+    Math.floor(100 * data.organisms[chosenOrg].brain.inputs[8]) / 100
+  }
+  eye4negative: ${
+    Math.floor(100 * data.organisms[chosenOrg].brain.inputs[9]) / 100
+  }
+  eye4positive: ${
+    Math.floor(100 * data.organisms[chosenOrg].brain.inputs[10]) / 100
+  }
+  eye4neutral: ${
+    Math.floor(100 * data.organisms[chosenOrg].brain.inputs[11]) / 100
   }
 
 
   
   `;
-
-  // eye1negative: ${data.organisms[chosenOrg].brain.inputs[0]}
-  // eye1positive: ${data.organisms[chosenOrg].brain.inputs[1]}
-  // eye1free: ${data.organisms[chosenOrg].brain.inputs[2]}
-  // eye2negative: ${data.organisms[chosenOrg].brain.inputs[3]}
-  // eye2positive: ${data.organisms[chosenOrg].brain.inputs[4]}
-  // eye2free: ${data.organisms[chosenOrg].brain.inputs[5]}
-  // eye3negative: ${data.organisms[chosenOrg].brain.inputs[6]}
-  // eye3positive: ${data.organisms[chosenOrg].brain.inputs[7]}
-  // eye3free: ${data.organisms[chosenOrg].brain.inputs[8]}
-  // eye4negative: ${data.organisms[chosenOrg].brain.inputs[9]}
-  // eye4positive: ${data.organisms[chosenOrg].brain.inputs[10]}
-  // eye4free: ${data.organisms[chosenOrg].brain.inputs[11]}
 
   // neuron1: ${data.organisms[chosenOrg].brain.hidden[0].value}
   // neuron2: ${data.organisms[chosenOrg].brain.hidden[1].value}
@@ -195,6 +218,9 @@ addEventListener("keydown", (event) => {
       break;
     case "z":
       camera.position.z -= 10;
+      break;
+    case "s":
+      console.log(JSON.stringify(data.organisms[chosenOrg]));
       break;
   }
 });

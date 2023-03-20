@@ -11,10 +11,10 @@ export class Neuron {
   public calculate(input: number[]): void {
     let sum = 1;
     for (let i = 0; i < input.length; i++) {
-      sum *= this.sigmoid(input[i] * this.weights[i]);
+      sum += input[i] * this.weights[i];
     }
     sum += this.bias;
-    this.value = sum;
+    this.value = this.sigmoid(sum);
   }
 
   sigmoid(x: number): number {
