@@ -1,6 +1,5 @@
 import * as THREE from "three";
 import { BufferGeometry, Vector3 } from "three";
-import * as BufferGeometryUtils from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { Brain } from "../ml/brain";
 import { Eye } from "./eye";
 import { Genome } from "./genome";
@@ -8,6 +7,7 @@ import { MaxAttributes } from "../consts/maxAttributes";
 import { Entity, EntityType } from "./entity";
 import { Neuron } from "../ml/neuron";
 import { firstNames, lastNames } from "../consts/names";
+import { Appearance } from "../utils/appearance";
 
 export class OrganismAttributes {
   public speedMultiplier: number;
@@ -66,71 +66,30 @@ export class Organism extends Entity {
       this.attributes.brainSize = brain.hidden.length;
     }
     this.initByGenome(genome);
-
     this.mesh = new THREE.Mesh(this.geometry, this.material);
   }
 
   private initByGenome(genome: Genome): void {
     // TODO: colors and appearance should be moved to separate class - also change how material is created to show different genes
-
+    this.genome = genome;
     this.setOrganismType(genome);
-    let r = Math.floor(genome.words[6] * 100);
-    let g = Math.floor(genome.words[7] * 100);
-    let b = Math.floor(genome.words[4] * 100);
-
-    if (this.type == EntityType.A) {
-      g += 150;
-    } else if (this.type == EntityType.D) {
-      r += 150;
-    } else if (this.type == EntityType.B) {
-      b += 100;
-      g + 100;
-    } else if (this.type == EntityType.C) {
-      r += 100;
-      b + 100;
-    }
+    Appearance.createAppearance(
+      genome,
+      this.type,
+      this.mesh,
+      this.geometry,
+      this.material
+    );
 
     this.name =
       firstNames[Math.floor(genome.words[14] * firstNames.length)] +
       lastNames[Math.floor(genome.words[15] * lastNames.length)];
 
-    if (this.type == EntityType.A) {
-      this.geometry = new THREE.IcosahedronGeometry(
-        genome.words[9] * genome.words[6] * 0.3 + 0.1,
-        2
-      );
-    } else {
-      const geo1 = new THREE.CapsuleGeometry(
-        genome.words[9] * genome.words[6] * 0.1 + 0.1,
-        genome.words[2] * 0.3 + 0.1,
-        4,
-        8
-      );
-      const geo2 = new THREE.CapsuleGeometry(
-        genome.words[11] * 0.1 + 0.1,
-        genome.words[11] * 0.1 + 0.1,
-        4,
-        8
-      );
-      geo2.translate(0, genome.words[11] * 0.1, 0);
-      // this.geometry = new BufferGeometry();
-      this.geometry = BufferGeometryUtils.mergeBufferGeometries([geo1, geo2]);
-    }
-
-    this.material = new THREE.MeshBasicMaterial({
-      color: new THREE.Color(`rgb(${r}, ${g}, ${b})`),
-    });
-
-    if (this.mesh?.material) {
-      this.mesh.material = this.material;
-      this.mesh.geometry = this.geometry;
-    }
-
     // TODO: rules could be moved to separate class
 
     this.speed = new THREE.Vector3(0.001, 0, 0);
-    this.genome = genome;
-    this.rotation = 0;
+
+    this.rotation = Math.random() * Math.PI * 2;
     this.acceleration = 0.0;
 
     this.attributes.maxHP = genome.words[9] * MaxAttributes.MAX_HEALTH;
