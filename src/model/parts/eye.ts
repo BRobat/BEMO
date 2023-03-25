@@ -1,9 +1,7 @@
 import { EntityType } from "./entity";
 
 export class Pixel {
-  positiveSignal: number = 0;
-  negativeSignal: number = 0;
-  neutralSignal: number = 0;
+  value: number = 0;
 }
 
 export class Eye {
@@ -15,6 +13,7 @@ export class Eye {
     for (let i = 0; i < resolution; i++) {
       this.pixels.push(new Pixel());
     }
+    this.reset();
   }
 
   hit(distance: number, ownType: string, hitType: string, angle: number) {
@@ -68,24 +67,20 @@ export class Eye {
         break;
     }
 
-    if (isNegativeNeutralPositive === 0) {
-      pixel.negativeSignal += (1 / distance) * this.alertness;
+    if (isNegativeNeutralPositive === 1) {
+      // pixel.value += (1 / distance) * this.alertness;
       // pixel.negativeSignal += 0.1;
-      if (pixel.negativeSignal > 1) {
-        pixel.negativeSignal = 1;
-      }
-    } else if (isNegativeNeutralPositive === 1) {
-      pixel.neutralSignal += (1 / distance) * this.alertness;
+    } else if (isNegativeNeutralPositive === 0) {
+      pixel.value -= (1 / distance) * this.alertness;
       // pixel.neutralSignal += 0.1;
-      if (pixel.neutralSignal > 1) {
-        pixel.neutralSignal = 1;
-      }
     } else {
-      pixel.positiveSignal += (1 / distance) * this.alertness;
+      pixel.value += (1 / distance) * this.alertness;
       // pixel.positiveSignal += 0.1;
-      if (pixel.positiveSignal > 1) {
-        pixel.positiveSignal = 1;
-      }
+    }
+    if (pixel.value > 1) {
+      pixel.value = 1;
+    } else if (pixel.value < -1) {
+      pixel.value = -1;
     }
   }
 
@@ -100,9 +95,7 @@ export class Eye {
 
   public reset() {
     this.pixels.forEach((pixel) => {
-      pixel.positiveSignal = 0;
-      pixel.negativeSignal = 0;
-      pixel.neutralSignal = 0;
+      pixel.value = 0;
     });
   }
 }
