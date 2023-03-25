@@ -182,7 +182,7 @@ export class Organism extends Entity {
 
     this.attributes.alertness = genome.words[8] * MaxAttributes.ALERTNESS;
 
-    this.eyes = new Eye(Math.PI * 2, 4, this.attributes.alertness);
+    this.eyes = new Eye(Math.PI * 2, 9, this.attributes.alertness);
   }
 
   private setOrganismType(genome: Genome): void {
@@ -241,44 +241,7 @@ export class Organism extends Entity {
     this.brainTick = 0;
     this.energy -= this.attributes.energyDrain;
     if (this.type !== EntityType.A) {
-      this.brain.inputs = [
-        this.eyes.pixels[0].negativeSignal
-          ? this.eyes.pixels[0].negativeSignal
-          : -1,
-        this.eyes.pixels[0].positiveSignal
-          ? this.eyes.pixels[0].positiveSignal
-          : -1,
-        this.eyes.pixels[0].neutralSignal
-          ? this.eyes.pixels[0].neutralSignal
-          : -1,
-        this.eyes.pixels[1].negativeSignal
-          ? this.eyes.pixels[1].negativeSignal
-          : -1,
-        this.eyes.pixels[1].positiveSignal
-          ? this.eyes.pixels[1].positiveSignal
-          : -1,
-        this.eyes.pixels[1].neutralSignal
-          ? this.eyes.pixels[1].neutralSignal
-          : -1,
-        this.eyes.pixels[2].negativeSignal
-          ? this.eyes.pixels[2].negativeSignal
-          : -1,
-        this.eyes.pixels[2].positiveSignal
-          ? this.eyes.pixels[2].positiveSignal
-          : -1,
-        this.eyes.pixels[2].neutralSignal
-          ? this.eyes.pixels[2].neutralSignal
-          : -1,
-        this.eyes.pixels[3].negativeSignal
-          ? this.eyes.pixels[3].negativeSignal
-          : -1,
-        this.eyes.pixels[3].positiveSignal
-          ? this.eyes.pixels[3].positiveSignal
-          : -1,
-        this.eyes.pixels[3].neutralSignal
-          ? this.eyes.pixels[3].neutralSignal
-          : -1,
-      ];
+      this.brain.inputs = this.eyes.pixels.map((pixel) => pixel.value);
       const output = this.brain.calculate();
       this.brain.outputs.forEach((o: Neuron, i) => {
         o.value = output[i];
