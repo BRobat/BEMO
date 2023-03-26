@@ -159,7 +159,7 @@ export class Data {
 
   private initBrains() {
     for (let i = 0; i < this.batchSize; i++) {
-      this.brains.push(new Brain(12, 12, 3));
+      this.brains.push(new Brain(9, 12, 3));
     }
   }
 
@@ -236,7 +236,7 @@ export class Data {
     if (this.aliveOrganisms <= this.batchSize / 10) {
       const i = Math.floor(Math.random() * this.batchSize);
       if (this.organisms[i].isDead) {
-        this.organisms[i].brain = new Brain(12, 12, 3);
+        this.organisms[i].brain = new Brain(9, 12, 3);
         this.organisms[i].isDead = false;
         this.organisms[i].energy = 290;
         this.organisms[i].attributes.lifespan = 500;
