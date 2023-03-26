@@ -53,7 +53,7 @@ export class Organism extends Entity {
 
   public attributes: OrganismAttributes = new OrganismAttributes();
 
-  private material: THREE.MeshBasicMaterial;
+  private material: THREE.Material | THREE.Material[];
   private geometry: THREE.BufferGeometry;
 
   public eyes: Eye = null;
@@ -73,13 +73,15 @@ export class Organism extends Entity {
     // TODO: colors and appearance should be moved to separate class - also change how material is created to show different genes
     this.genome = genome;
     this.setOrganismType(genome);
-    Appearance.createAppearance(
+    this.mesh = Appearance.createAppearance(
       genome,
       this.type,
       this.mesh,
       this.geometry,
       this.material
     );
+    this.geometry = this.mesh?.geometry;
+    this.material = this.mesh?.material;
 
     this.name =
       firstNames[Math.floor(genome.words[14] * firstNames.length)] +
@@ -135,7 +137,7 @@ export class Organism extends Entity {
         this.attributes.defense) *
       0.001;
 
-    this.attributes.fieldOfView = Math.PI;
+    this.attributes.fieldOfView = Math.PI; // unused
 
     this.energy = this.attributes.baseEnergy;
 
