@@ -35,7 +35,7 @@ let cube = new THREE.Mesh(
   new THREE.BoxGeometry(mapSize, mapSize, 1),
   new THREE.MeshBasicMaterial({ color: 0x111111 })
 );
-cube.position.set(0, 0, -1);
+cube.position.set(0, 0, -0.5);
 
 scene.add(cube);
 
@@ -179,7 +179,8 @@ function animate() {
   requestAnimationFrame(animate);
   data.updateOrganisms();
   camera.position.x = data.organisms[chosenOrg].mesh.position.x;
-  camera.position.y = data.organisms[chosenOrg].mesh.position.y;
+  camera.position.y = data.organisms[chosenOrg].mesh.position.y - 10;
+  camera.lookAt(data.organisms[chosenOrg].mesh.position);
 
   // if (tick % genDuration === 0) {
   //     nextGeneration();
@@ -214,10 +215,10 @@ addEventListener("keydown", (event) => {
       chosenOrg -= 1;
       break;
     case "a":
-      camera.position.z += 10;
+      camera.position.z += 3;
       break;
     case "z":
-      camera.position.z -= 10;
+      camera.position.z -= 3;
       break;
     case "s":
       console.log(JSON.stringify(data.organisms[chosenOrg]));
