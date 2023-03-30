@@ -37,6 +37,8 @@ export class Eye {
           isNegativeNeutralPositive = 0;
         } else if (hitType === EntityType.EA) {
           isNegativeNeutralPositive = 2;
+        } else if (hitType === EntityType.ROCK) {
+          isNegativeNeutralPositive = 0;
         }
         break;
       case EntityType.C:
@@ -50,6 +52,8 @@ export class Eye {
           isNegativeNeutralPositive = 0;
         } else if (hitType === EntityType.EA) {
           isNegativeNeutralPositive = 2;
+        } else if (hitType === EntityType.ROCK) {
+          isNegativeNeutralPositive = 0;
         }
         break;
       case EntityType.D:
@@ -63,6 +67,8 @@ export class Eye {
           isNegativeNeutralPositive = 0;
         } else if (hitType === EntityType.EA) {
           isNegativeNeutralPositive = 2;
+        } else if (hitType === EntityType.ROCK) {
+          isNegativeNeutralPositive = 0;
         }
         break;
     }

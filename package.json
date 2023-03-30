@@ -43,6 +43,7 @@
     "wepack-cli": "^0.0.1-security"
   },
   "dependencies": {
+    "@three-ts/orbit-controls": "^1.4.7",
     "three": "^0.148.0"
   }
 }

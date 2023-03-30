@@ -80,6 +80,7 @@ export class Organism extends Entity {
       this.geometry,
       this.material
     );
+    this.mesh.scale.set(1, 1, 1);
     this.geometry = this.mesh?.geometry;
     this.material = this.mesh?.material;
 
@@ -88,6 +89,8 @@ export class Organism extends Entity {
       lastNames[Math.floor(genome.words[15] * lastNames.length)];
 
     // TODO: rules could be moved to separate class
+
+    this.size = genome.words[6] * 0.3 + 0.1;
 
     this.speed = new THREE.Vector3(0.001, 0, 0);
 
@@ -292,8 +295,10 @@ export class Organism extends Entity {
     newBrain.mutate(mutateFactor);
     newGenes.mutate(mutateFactor);
     const newOrganism = new Organism(newBrain, newGenes);
-    let x = 1;
-    this.type !== EntityType.A ? (x = 3) : (x = Math.random() * 25);
+    let x = Math.random() * this.size;
+    // this.type !== EntityType.A ? (x = 3) : (x = Math.random() * 25);
+
+    //this is no random circle
     newOrganism.mesh.position.set(
       this.mesh.position.x + Math.random() * x - x / 2,
       this.mesh.position.y + Math.random() * x - x / 2,
@@ -340,6 +345,7 @@ export class Organism extends Entity {
     console.log(text);
     this.isDead = true;
     this.mesh.position.set(10000, 10000, 0);
+    this.mesh.scale.set(0, 0, 0);
   }
 
   public addEnergy(energy: number) {

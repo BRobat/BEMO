@@ -6,6 +6,7 @@ import { Brain } from "../ml/brain";
 import { Genome } from "../parts/genome";
 import { Entity, EntityType } from "../parts/entity";
 import { HashUtils } from "./hashUtils";
+import { Vector3 } from "three";
 
 export class Data {
   public entities: Entity[] = [];
@@ -16,7 +17,8 @@ export class Data {
   public brains: Brain[] = [];
   public bestScore: number = 0;
 
-  public batchSize: number = 3000;
+  public batchSize: number = 4000;
+  public obstacleBatch: number = 500;
 
   public aliveOrganisms: number = 0;
   public sunEnergy: number = 0.2;
@@ -28,7 +30,8 @@ export class Data {
   constructor(private mapSize: number) {
     this.hashThreshold = 10;
     this.initBrains();
-    this.initOrganisms(2000);
+    this.initObstacles();
+    this.initOrganisms(1000);
     this.initEnergyPacks();
   }
 
@@ -117,7 +120,7 @@ export class Data {
 
   private getOffsprings() {
     const planktonNumber = this.getPlanktonNumber();
-    const canSpawnPlankton = planktonNumber < 1000;
+    const canSpawnPlankton = planktonNumber < 2000;
     this.organisms.forEach((org) => {
       if (
         !org.isDead &&
@@ -159,14 +162,46 @@ export class Data {
 
   private initBrains() {
     for (let i = 0; i < this.batchSize; i++) {
-      this.brains.push(new Brain(9, 12, 3));
+      this.brains.push(new Brain(9, 6, 3));
     }
+  }
+
+  private initObstacles() {
+    this.obstacles = [];
+    let lastPosition = new Vector3(0, 0, 0);
+    let lastSize = 0;
+    let lastAngle = 0;
+    for (let i = 0; i < this.obstacleBatch; i++) {
+      const newObstacle = new Obstacle(Math.random() + 1);
+      if (Math.random() < 0.9999) {
+        newObstacle.mesh.position.set(
+          lastPosition.x + lastSize * Math.cos(lastAngle),
+          lastPosition.y + lastSize * Math.sin(lastAngle),
+          0
+        );
+      } else {
+        newObstacle.mesh.position.set(
+          Math.random() * this.mapSize - this.mapSize / 2,
+          Math.random() * this.mapSize - this.mapSize / 2,
+          0
+        );
+      }
+
+      lastAngle += ((Math.random() - 0.5) * Math.PI) / 3;
+      lastPosition = newObstacle.mesh.position.clone();
+      lastSize = newObstacle.size;
+      this.obstacles.push(newObstacle);
+      this.entities.push(newObstacle);
+    }
+    this.teleportObstacles();
+    this.teleportObstacles();
+    this.teleportObstacles();
   }
 
   private initEnergyPacks() {
     this.energyPacks = [];
     for (let i = 0; i < this.batchSize; i++) {
-      if (i < 1000) {
+      if (i < 1) {
         const newEnergyPack = new EnergyPack();
         newEnergyPack.mesh.position.set(
           Math.random() * this.mapSize - this.mapSize / 2,
@@ -207,6 +242,23 @@ export class Data {
           Math.random(),
           Math.random(),
           Math.random(),
+          // 0.05,
+          // 0.5,
+          // 0.2,
+          // 0.1,
+          // 0.1,
+          // 0.1,
+          // 0.1,
+          // 0.5,
+          // 0.1,
+          // 0.05,
+          // 0.1,
+          // 0.1,
+          // 0.1,
+          // 0.1,
+          // 0.1,
+          // 0.1,
+          // 0.1
         ])
       );
       this.organisms.push(newOrganism);
@@ -236,7 +288,7 @@ export class Data {
     if (this.aliveOrganisms <= this.batchSize / 10) {
       const i = Math.floor(Math.random() * this.batchSize);
       if (this.organisms[i].isDead) {
-        this.organisms[i].brain = new Brain(9, 12, 3);
+        this.organisms[i].brain = new Brain(9, 6, 3);
         this.organisms[i].isDead = false;
         this.organisms[i].energy = 290;
         this.organisms[i].attributes.lifespan = 500;
@@ -276,6 +328,23 @@ export class Data {
       }
       if (org.mesh.position.y < -this.mapSize / 2) {
         org.mesh.position.y = this.mapSize / 2;
+      }
+    });
+  }
+
+  teleportObstacles() {
+    this.obstacles.forEach((org) => {
+      if (org.mesh.position.x > this.mapSize / 2) {
+        org.mesh.position.x -= this.mapSize;
+      }
+      if (org.mesh.position.x < -this.mapSize / 2) {
+        org.mesh.position.x += this.mapSize;
+      }
+      if (org.mesh.position.y > this.mapSize / 2) {
+        org.mesh.position.y -= this.mapSize;
+      }
+      if (org.mesh.position.y < -this.mapSize / 2) {
+        org.mesh.position.y += this.mapSize;
       }
     });
   }

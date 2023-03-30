@@ -16,7 +16,6 @@ Some of the rules could be simillar to a rpg game.
 
 - add two types of energy packs
 - make photosynthesis less effective when theres a lot of energy packs ( or reduce the likeness of multiplying)
-- combine geometries to create more complex bodies
 - rework photosynthesis to not stop organism from moving
 - rework lifespan
 - add walls

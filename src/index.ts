@@ -2,10 +2,11 @@ import * as THREE from "three";
 import { Data } from "./model/utils/data";
 import { Obstacle } from "./model/parts/obstacle";
 import { Organism } from "./model/parts/organism";
+import { OrbitControls } from "@three-ts/orbit-controls";
 
 let scene = new THREE.Scene();
 let camera = new THREE.PerspectiveCamera(
-  30,
+  60,
   window.innerWidth / window.innerHeight,
   0.1,
   1000
@@ -22,6 +23,26 @@ const mapSize = 150;
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.minPolarAngle = Math.PI / 2;
+controls.maxPolarAngle = (Math.PI * 10) / 11;
+controls.minAzimuthAngle = 0;
+controls.maxAzimuthAngle = 0;
+
+controls.center.set(0, 0, 0);
+
+// How far you can dolly in and out ( PerspectiveCamera only )
+controls.minDistance = 0;
+controls.maxDistance = 100000;
+
+const enableZoom = true; // Set to false to disable zooming
+const zoomSpeed = 1.0;
+
+controls.enablePan = true; // Set to false to disable panning (ie vertical and horizontal translations)
+
+controls.enableDamping = false; // Set to false to disable damping (ie inertia)
+controls.dampingFactor = 0.25;
+
 const element = document.createElement("p");
 element.id = "generation";
 element.style.setProperty("position", "absolute");
@@ -33,7 +54,7 @@ document.body.appendChild(element);
 
 let cube = new THREE.Mesh(
   new THREE.BoxGeometry(mapSize, mapSize, 1),
-  new THREE.MeshBasicMaterial({ color: 0x111111 })
+  new THREE.MeshBasicMaterial({ color: 0x554455 })
 );
 cube.position.set(0, 0, -0.5);
 
@@ -178,9 +199,9 @@ function updateLabel() {
 function animate() {
   requestAnimationFrame(animate);
   data.updateOrganisms();
-  camera.position.x = data.organisms[chosenOrg].mesh.position.x;
-  camera.position.y = data.organisms[chosenOrg].mesh.position.y - 10;
-  camera.lookAt(data.organisms[chosenOrg].mesh.position);
+  // camera.position.x = data.organisms[chosenOrg].mesh.position.x;
+  // camera.position.y = data.organisms[chosenOrg].mesh.position.y - 10;
+  // camera.lookAt(data.organisms[chosenOrg].mesh.position);
 
   // if (tick % genDuration === 0) {
   //     nextGeneration();
@@ -208,11 +229,11 @@ addEventListener("keydown", (event) => {
       break;
     case "ArrowUp":
       camera.position.y += 5;
-      chosenOrg += 1;
+      // chosenOrg += 1;
       break;
     case "ArrowDown":
       camera.position.y -= 5;
-      chosenOrg -= 1;
+      // chosenOrg -= 1;
       break;
     case "a":
       camera.position.z += 3;
