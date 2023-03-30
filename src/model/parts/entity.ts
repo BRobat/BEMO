@@ -7,10 +7,12 @@ export enum EntityType {
   D = "D",
   EA = "EA",
   EBCD = "EBCD",
+  ROCK = "ROCK",
 }
 
 export class Entity {
   public mesh: THREE.Mesh;
   public energy: number;
   public type: string;
+  public size: number;
 }

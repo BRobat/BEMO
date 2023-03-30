@@ -14,7 +14,11 @@ export class Physics {
       return;
     }
     es.forEach((e1: Entity, j) => {
-      if (!(e1 instanceof Organism) || e1.isDead || e1.type == EntityType.A) {
+      if (
+        !(e1 instanceof Organism) ||
+        e1.isDead ||
+        (e1.type == EntityType.A && e1.timeAlive > 100)
+      ) {
         return;
       }
       const eHash = HashUtils.getEntityHash(e1, hashThreshold);
@@ -33,7 +37,8 @@ export class Physics {
         if (es[i] instanceof Organism && es[i] == e1) {
           return;
         }
-        const newDistance = e1.mesh.position.distanceTo(es[i].mesh.position);
+        const newDistance =
+          e1.mesh.position.distanceTo(es[i].mesh.position) - es[i].size;
         if (newDistance < distance) {
           const rotationVector = new Vector3(0, 1, 0).applyAxisAngle(
             new Vector3(0, 0, 1),
@@ -46,7 +51,7 @@ export class Physics {
             0
           );
           const cross = new Vector3();
-          cross.crossVectors(rotationVector, relativePosition); // this part is shit
+          cross.crossVectors(rotationVector, relativePosition);
           const direction = Math.sign(cross.z);
           const angle = rotationVector.angleTo(relativePosition);
 
@@ -71,7 +76,10 @@ export class Physics {
   }
 
   static collisionDetection(e1: Entity, es: Entity) {
-    if (e1.mesh.position.distanceTo(es.mesh.position) <= 0.3 && e1 != es) {
+    if (
+      e1.mesh.position.distanceTo(es.mesh.position) <= e1.size + es.size &&
+      e1 != es
+    ) {
       return true;
     } else {
       return false;
