@@ -91,8 +91,18 @@ export class Organism extends Entity {
     // TODO: rules could be moved to separate class
 
     this.size = genome.words[6] * 0.3 + 0.1;
+    this.mass = genome.words[6] * 100;
+    if (this.type === EntityType.A) this.mass += 100;
 
-    this.speed = new THREE.Vector3(0.001, 0, 0);
+    if (this.type === EntityType.A) {
+      this.speed = new THREE.Vector3(
+        Math.random() - 0.5,
+        Math.random() - 0.5,
+        0
+      );
+    } else {
+      this.speed = new THREE.Vector3(0.001, 0, 0);
+    }
 
     this.rotation = Math.random() * Math.PI * 2;
     this.acceleration = 0.0;
@@ -295,13 +305,13 @@ export class Organism extends Entity {
     newBrain.mutate(mutateFactor);
     newGenes.mutate(mutateFactor);
     const newOrganism = new Organism(newBrain, newGenes);
-    let x = Math.random() * this.size;
+    let phi = Math.PI * 2 * Math.random();
     // this.type !== EntityType.A ? (x = 3) : (x = Math.random() * 25);
 
     //this is no random circle
     newOrganism.mesh.position.set(
-      this.mesh.position.x + Math.random() * x - x / 2,
-      this.mesh.position.y + Math.random() * x - x / 2,
+      this.mesh.position.x + this.size * Math.cos(phi),
+      this.mesh.position.y + this.size * Math.sin(phi),
       this.mesh.position.z
     );
     newOrganism.mesh.rotation.set(
@@ -369,6 +379,7 @@ export class Organism extends Entity {
       org.mesh.position.y,
       org.mesh.position.z
     );
+    this.speed.set(org.speed.x, org.speed.y, org.speed.z);
     this.mesh.rotation.set(
       Math.random() * Math.PI * 2,
       Math.random() * Math.PI * 2,

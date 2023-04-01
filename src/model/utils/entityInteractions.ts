@@ -72,14 +72,23 @@ export class EntityInteractions {
     let distance = e1.mesh.position.distanceTo(e2.mesh.position);
 
     //how force could be calculated?
-    // const pushForce = 0.1 / (distance * distance);
-    const pushForce = 0.1;
+    const pushForce1 = (0.001 / (distance * distance)) * e2.mass;
+    const pushForce2 = (0.001 / (distance * distance)) * e1.mass;
+    // const pushForce = 0.1;
     const pushVector = new Vector3(
-      (e1.mesh.position.x - e2.mesh.position.x) / distance,
-      (e1.mesh.position.y - e2.mesh.position.y) / distance,
+      (e1.mesh.position.x - e2.mesh.position.x) / distance / e1.mass,
+      (e1.mesh.position.y - e2.mesh.position.y) / distance / e1.mass,
       0
     );
-    e1.speed = e1.speed.add(pushVector.multiplyScalar(pushForce));
-    return pushForce;
+    if (e2 instanceof Organism) {
+      const pushVector2 = new Vector3(
+        (e2.mesh.position.x - e1.mesh.position.x) / distance / e2.mass,
+        (e2.mesh.position.y - e1.mesh.position.y) / distance / e2.mass,
+        0
+      );
+      e2.speed = e2.speed.add(pushVector2.multiplyScalar(pushForce2));
+    }
+    e1.speed = e1.speed.add(pushVector.multiplyScalar(pushForce1));
+    return pushForce1;
   }
 }

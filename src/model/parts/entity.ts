@@ -15,4 +15,5 @@ export class Entity {
   public energy: number;
   public type: string;
   public size: number;
+  public mass: number;
 }

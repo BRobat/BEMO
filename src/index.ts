@@ -54,7 +54,7 @@ document.body.appendChild(element);
 
 let cube = new THREE.Mesh(
   new THREE.BoxGeometry(mapSize, mapSize, 1),
-  new THREE.MeshBasicMaterial({ color: 0x554455 })
+  new THREE.MeshBasicMaterial({ color: 0x334455 })
 );
 cube.position.set(0, 0, -0.5);
 

@@ -20,6 +20,10 @@ export class Eye {
     const pixel = this.determinePixel(angle);
     // TODO: check pixelSignal function
 
+    // deadpixel
+    if (!pixel) {
+      return;
+    }
     let isNegativeNeutralPositive = 0;
 
     switch (ownType) {

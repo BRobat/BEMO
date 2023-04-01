@@ -44,6 +44,7 @@
   },
   "dependencies": {
     "@three-ts/orbit-controls": "^1.4.7",
+    "gpu.js": "^2.16.0",
     "three": "^0.148.0"
   }
 }

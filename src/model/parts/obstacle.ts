@@ -11,5 +11,6 @@ export class Obstacle extends Entity {
     this.energy = 100;
     this.mesh = new THREE.Mesh(geometry, material);
     this.type = EntityType.ROCK;
+    this.mass = 1000;
   }
 }
