@@ -57,9 +57,9 @@ export class Appearance {
 
     const mat2 = new THREE.MeshBasicMaterial({
       color: new THREE.Color(
-        `rgb(${Math.floor(genome.words[6] * 50)}, ${
+        `rgb(${Math.floor(genome.words[6] * 50 + genome.words[14] * 100)}, ${
           Math.floor(genome.words[7] * 50) + 100
-        }, ${Math.floor(genome.words[4] * 50)})`
+        }, ${Math.floor(genome.words[4] * 50 + genome.words[15] * 100)})`
       ),
     });
     body.rotateX(Math.PI / 2);

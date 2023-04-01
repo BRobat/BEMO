@@ -94,7 +94,15 @@ export class Organism extends Entity {
     this.mass = genome.words[6] * 100;
     if (this.type === EntityType.A) this.mass += 100;
 
-    this.speed = new THREE.Vector3(0.001, 0, 0);
+    if (this.type === EntityType.A) {
+      this.speed = new THREE.Vector3(
+        Math.random() - 0.5,
+        Math.random() - 0.5,
+        0
+      );
+    } else {
+      this.speed = new THREE.Vector3(0.001, 0, 0);
+    }
 
     this.rotation = Math.random() * Math.PI * 2;
     this.acceleration = 0.0;
@@ -297,7 +305,7 @@ export class Organism extends Entity {
     newBrain.mutate(mutateFactor);
     newGenes.mutate(mutateFactor);
     const newOrganism = new Organism(newBrain, newGenes);
-    let phi = Math.PI * 2;
+    let phi = Math.PI * 2 * Math.random();
     // this.type !== EntityType.A ? (x = 3) : (x = Math.random() * 25);
 
     //this is no random circle
@@ -310,11 +318,6 @@ export class Organism extends Entity {
       this.mesh.rotation.x,
       this.mesh.rotation.y,
       this.mesh.rotation.z
-    );
-    newOrganism.speed.set(
-      this.size * Math.cos(phi),
-      this.size * Math.sin(phi),
-      0
     );
     newOrganism.rotation = this.rotation;
     newOrganism.isDead = false;
@@ -376,6 +379,7 @@ export class Organism extends Entity {
       org.mesh.position.y,
       org.mesh.position.z
     );
+    this.speed.set(org.speed.x, org.speed.y, org.speed.z);
     this.mesh.rotation.set(
       Math.random() * Math.PI * 2,
       Math.random() * Math.PI * 2,
