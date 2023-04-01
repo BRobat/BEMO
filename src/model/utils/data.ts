@@ -31,7 +31,7 @@ export class Data {
     this.hashThreshold = 10;
     this.initBrains();
     this.initObstacles();
-    this.initOrganisms(1000);
+    this.initOrganisms(2000);
     this.initEnergyPacks();
   }
 
@@ -201,7 +201,7 @@ export class Data {
   private initEnergyPacks() {
     this.energyPacks = [];
     for (let i = 0; i < this.batchSize; i++) {
-      if (i < 1) {
+      if (i < 200) {
         const newEnergyPack = new EnergyPack();
         newEnergyPack.mesh.position.set(
           Math.random() * this.mapSize - this.mapSize / 2,

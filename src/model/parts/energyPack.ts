@@ -13,6 +13,7 @@ export class EnergyPack extends Entity {
     this.energy = 100;
     this.mesh = new THREE.Mesh(geometry, material);
     this.type = EntityType.EA;
+    this.mass = 0.1;
   }
 
   public deactivate() {
