@@ -16,4 +16,5 @@ export class Entity {
   public type: string;
   public size: number;
   public mass: number;
+  public uuid: string;
 }

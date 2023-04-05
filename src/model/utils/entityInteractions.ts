@@ -72,8 +72,8 @@ export class EntityInteractions {
     let distance = e1.mesh.position.distanceTo(e2.mesh.position);
 
     //how force could be calculated?
-    const pushForce1 = (0.001 / (distance * distance)) * e2.mass;
-    const pushForce2 = (0.001 / (distance * distance)) * e1.mass;
+    const pushForce1 = (0.0005 / (distance * distance)) * e2.mass;
+    const pushForce2 = (0.0005 / (distance * distance)) * e1.mass;
     // const pushForce = 0.1;
     const pushVector = new Vector3(
       (e1.mesh.position.x - e2.mesh.position.x) / distance / e1.mass,

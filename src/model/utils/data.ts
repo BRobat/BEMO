@@ -31,7 +31,7 @@ export class Data {
     this.hashThreshold = 10;
     this.initBrains();
     this.initObstacles();
-    this.initOrganisms(2000);
+    this.initOrganisms(1000);
     this.initEnergyPacks();
   }
 
@@ -173,7 +173,7 @@ export class Data {
     let lastAngle = 0;
     for (let i = 0; i < this.obstacleBatch; i++) {
       const newObstacle = new Obstacle(Math.random() + 1);
-      if (Math.random() < 0.9999) {
+      if (Math.random() < 0.99) {
         newObstacle.mesh.position.set(
           lastPosition.x + lastSize * Math.cos(lastAngle),
           lastPosition.y + lastSize * Math.sin(lastAngle),

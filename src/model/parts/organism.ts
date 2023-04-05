@@ -67,6 +67,7 @@ export class Organism extends Entity {
     }
     this.initByGenome(genome);
     this.mesh = new THREE.Mesh(this.geometry, this.material);
+    this.uuid = this.mesh.uuid;
   }
 
   private initByGenome(genome: Genome): void {
@@ -96,8 +97,8 @@ export class Organism extends Entity {
 
     if (this.type === EntityType.A) {
       this.speed = new THREE.Vector3(
-        Math.random() - 0.5,
-        Math.random() - 0.5,
+        2 * (Math.random() - 0.5),
+        2 * (Math.random() - 0.5),
         0
       );
     } else {
