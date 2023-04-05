@@ -1,8 +1,8 @@
 import * as THREE from "three";
 import { Data } from "./model/utils/data";
-import { Obstacle } from "./model/parts/obstacle";
 import { Organism } from "./model/parts/organism";
 import { OrbitControls } from "@three-ts/orbit-controls";
+import { Entity } from "./model/parts/entity";
 
 let scene = new THREE.Scene();
 let camera = new THREE.PerspectiveCamera(
@@ -13,13 +13,32 @@ let camera = new THREE.PerspectiveCamera(
 );
 let chosenOrg = 0;
 
-let renderer = new THREE.WebGLRenderer();
+let renderer = new THREE.WebGLRenderer({
+  antialias: true,
+  alpha: true,
+  powerPreference: "high-performance",
+});
+
+let selectrionRing = new THREE.Mesh(
+  new THREE.RingGeometry(0.55, 0.6, 32),
+  new THREE.MeshBasicMaterial({
+    color: 0x00ff00,
+    side: THREE.DoubleSide,
+
+    opacity: 0.5,
+  })
+);
+
+let raycaster = new THREE.Raycaster();
 
 let tick = 1;
 let meanScore = 0;
 let genDuration = 10;
 const mapSize = 150;
 
+let followSelected = false;
+
+renderer.setSize(document.body.clientWidth, document.body.clientHeight);
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
@@ -91,6 +110,8 @@ data.energyPacks.forEach((energyPack) => {
   scene.add(energyPack.mesh);
 });
 
+scene.add(selectrionRing);
+
 camera.position.z = 200;
 
 // setInterval(() => {}, 10000);
@@ -108,77 +129,58 @@ function updateLabel() {
   } \n Dead matter: ${
     data.energyPacks.filter((e) => e.isActive).length
   }\n Total energy: ${Math.floor(energy)}
-  \n 
-  ${data.organisms[chosenOrg].name}
-  Time alive: ${Math.floor(data.organisms[chosenOrg].timeAlive / 10)}
- HP: ${Math.round(data.organisms[chosenOrg].hp)} / ${Math.round(
+  \n  
+    ${data.organisms[chosenOrg].name}
+    Time alive: ${Math.floor(data.organisms[chosenOrg].timeAlive / 10)}
+   HP: ${Math.round(data.organisms[chosenOrg].hp)} / ${Math.round(
     data.organisms[chosenOrg].attributes.maxHP
   )}
- energy: ${Math.round(data.organisms[chosenOrg].energy)} / ${Math.round(
+   energy: ${Math.round(data.organisms[chosenOrg].energy)} / ${Math.round(
     data.organisms[chosenOrg].attributes.maxEnergy
   )}
- speed: ${
-   Math.round(
-     data.organisms[chosenOrg].speed.distanceTo(new THREE.Vector3(0, 0, 0)) *
-       100
-   ) / 100
- }
- attackStrength: ${Math.round(data.organisms[chosenOrg].attributes.attack)}
-  defense: ${Math.round(data.organisms[chosenOrg].attributes.defense)}
-  Type: ${data.organisms[chosenOrg].type}
-  sight: ${Math.round(data.organisms[chosenOrg].attributes.eyeSight)}
+   speed: ${
+     Math.round(
+       data.organisms[chosenOrg].speed.distanceTo(new THREE.Vector3(0, 0, 0)) *
+         100
+     ) / 100
+   }
+   attackStrength: ${Math.round(data.organisms[chosenOrg].attributes.attack)}
+    defense: ${Math.round(data.organisms[chosenOrg].attributes.defense)}
+    Type: ${data.organisms[chosenOrg].type}
+    sight: ${Math.round(data.organisms[chosenOrg].attributes.eyeSight)}
+    `;
 
- 
-  right: ${
-    Math.round(data.organisms[chosenOrg].brain.outputs[0].value * 100) / 100
-  }
-  left: ${
-    Math.round(data.organisms[chosenOrg].brain.outputs[1].value * 100) / 100
-  }
-  accel: ${
-    Math.round(data.organisms[chosenOrg].brain.outputs[2].value * 100) / 100
-  }
+  //   right: ${Math.round(data.organisms[chosenOrg].brain.outputs[0].value * 100) / 100
+  //     }
+  //   left: ${Math.round(data.organisms[chosenOrg].brain.outputs[1].value * 100) / 100
+  //     }
+  //   accel: ${Math.round(data.organisms[chosenOrg].brain.outputs[2].value * 100) / 100
+  //     }
 
-  eye1negative: ${
-    Math.floor(100 * data.organisms[chosenOrg].brain.inputs[0]) / 100
-  }
-  eye1positive: ${
-    Math.floor(100 * data.organisms[chosenOrg].brain.inputs[1]) / 100
-  }
-  eye1neutral: ${
-    Math.floor(100 * data.organisms[chosenOrg].brain.inputs[2]) / 100
-  }
-  eye2negative: ${
-    Math.floor(100 * data.organisms[chosenOrg].brain.inputs[3]) / 100
-  }
-  eye2positive: ${
-    Math.floor(100 * data.organisms[chosenOrg].brain.inputs[4]) / 100
-  }
-  eye2neutral: ${
-    Math.floor(100 * data.organisms[chosenOrg].brain.inputs[5]) / 100
-  }
-  eye3negative: ${
-    Math.floor(100 * data.organisms[chosenOrg].brain.inputs[6]) / 100
-  }
-  eye3positive: ${
-    Math.floor(100 * data.organisms[chosenOrg].brain.inputs[7]) / 100
-  }
-  eye3neutral: ${
-    Math.floor(100 * data.organisms[chosenOrg].brain.inputs[8]) / 100
-  }
-  eye4negative: ${
-    Math.floor(100 * data.organisms[chosenOrg].brain.inputs[9]) / 100
-  }
-  eye4positive: ${
-    Math.floor(100 * data.organisms[chosenOrg].brain.inputs[10]) / 100
-  }
-  eye4neutral: ${
-    Math.floor(100 * data.organisms[chosenOrg].brain.inputs[11]) / 100
-  }
-
-
-  
-  `;
+  //   eye1negative: ${Math.floor(100 * data.organisms[chosenOrg].brain.inputs[0]) / 100
+  //     }
+  //   eye1positive: ${Math.floor(100 * data.organisms[chosenOrg].brain.inputs[1]) / 100
+  //     }
+  //   eye1neutral: ${Math.floor(100 * data.organisms[chosenOrg].brain.inputs[2]) / 100
+  //     }
+  //   eye2negative: ${Math.floor(100 * data.organisms[chosenOrg].brain.inputs[3]) / 100
+  //     }
+  //   eye2positive: ${Math.floor(100 * data.organisms[chosenOrg].brain.inputs[4]) / 100
+  //     }
+  //   eye2neutral: ${Math.floor(100 * data.organisms[chosenOrg].brain.inputs[5]) / 100
+  //     }
+  //   eye3negative: ${Math.floor(100 * data.organisms[chosenOrg].brain.inputs[6]) / 100
+  //     }
+  //   eye3positive: ${Math.floor(100 * data.organisms[chosenOrg].brain.inputs[7]) / 100
+  //     }
+  //   eye3neutral: ${Math.floor(100 * data.organisms[chosenOrg].brain.inputs[8]) / 100
+  //     }
+  //   eye4negative: ${Math.floor(100 * data.organisms[chosenOrg].brain.inputs[9]) / 100
+  //     }
+  //   eye4positive: ${Math.floor(100 * data.organisms[chosenOrg].brain.inputs[10]) / 100
+  //     }
+  //   eye4neutral: ${Math.floor(100 * data.organisms[chosenOrg].brain.inputs[11]) / 100
+  //     }
 
   // neuron1: ${data.organisms[chosenOrg].brain.hidden[0].value}
   // neuron2: ${data.organisms[chosenOrg].brain.hidden[1].value}
@@ -199,8 +201,15 @@ function updateLabel() {
 function animate() {
   requestAnimationFrame(animate);
   data.updateOrganisms();
-  // camera.position.x = data.organisms[chosenOrg].mesh.position.x;
-  // camera.position.y = data.organisms[chosenOrg].mesh.position.y - 10;
+  if (followSelected) {
+    camera.position.y = data.organisms[chosenOrg].mesh.position.y - 10;
+    camera.position.x = data.organisms[chosenOrg].mesh.position.x;
+    selectrionRing.position.x = data.organisms[chosenOrg].mesh.position.x;
+    selectrionRing.position.y = data.organisms[chosenOrg].mesh.position.y;
+    selectrionRing.position.z = data.organisms[chosenOrg].mesh.position.z + 0.1;
+    controls.target = data.organisms[chosenOrg].mesh.position;
+  } else {
+  }
   // camera.lookAt(data.organisms[chosenOrg].mesh.position);
 
   // if (tick % genDuration === 0) {
@@ -244,7 +253,49 @@ addEventListener("keydown", (event) => {
     case "s":
       console.log(JSON.stringify(data.organisms[chosenOrg]));
       break;
+    case "q":
+      controls.enablePan = followSelected;
+      followSelected = !followSelected;
+      if (!followSelected) {
+        controls.target = data.organisms[chosenOrg].mesh.position.clone();
+        selectrionRing.position.x = 100000;
+        selectrionRing.position.y = 100000;
+      }
+      break;
+    case "w":
+      data.organisms[chosenOrg].energy += 50;
+      break;
+    case "e":
+      data.organisms[chosenOrg].kill("killed by users");
+      break;
   }
 });
 
+renderer.domElement.addEventListener("click", (event) => {
+  var mouse = new THREE.Vector2();
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+  // Cast a ray from the camera to the mouse position
+  raycaster.setFromCamera(mouse, camera);
+
+  // Find all intersected objects
+  var intersects = raycaster.intersectObjects(scene.children, true);
+
+  // If an object was clicked, do something
+  if (intersects.length > 0) {
+    intersects.find((intersection) => {
+      if (!data) {
+        return;
+      }
+      data.organisms.find((entity: Entity, i) => {
+        if (entity.mesh.uuid === intersection.object.uuid) {
+          chosenOrg = i;
+          controls.enablePan = false;
+          followSelected = true;
+        }
+      });
+    });
+  }
+});
 animate();

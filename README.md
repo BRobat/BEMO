@@ -14,11 +14,13 @@ Some of the rules could be simillar to a rpg game.
 
 ## TODO
 
-- add two types of energy packs
-- make photosynthesis less effective when theres a lot of energy packs ( or reduce the likeness of multiplying)
-- rework photosynthesis to not stop organism from moving
+- make children
 - rework lifespan
-- add walls
+- make everything happen on a sphere
+- add two types of energy packs
+- make photosynthesis less effective when theres a lot of energy packs ( or reduce the likeness of multiplying).
+- add more genes setting organism environmental needs
+- rework photosynthesis to not stop organism from moving
 - add memory to the brain
 - make brain resizable
 - add reload button
