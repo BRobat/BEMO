@@ -12,6 +12,10 @@ to bundle this app
 
 Some of the rules could be simillar to a rpg game.
 
+### Genes and attributes
+
+### Fighting
+
 ## TODO
 
 - make children
@@ -19,6 +23,7 @@ Some of the rules could be simillar to a rpg game.
 - make everything happen on a sphere
 - add two types of energy packs
 - make photosynthesis less effective when theres a lot of energy packs ( or reduce the likeness of multiplying).
+  - create effects on
 - add more genes setting organism environmental needs
 - rework photosynthesis to not stop organism from moving
 - add memory to the brain

@@ -291,7 +291,6 @@ export class Data {
         this.organisms[i].brain = new Brain(9, 6, 3);
         this.organisms[i].isDead = false;
         this.organisms[i].energy = 290;
-        this.organisms[i].attributes.lifespan = 500;
         this.organisms[i].mesh.position.set(
           (Math.random() * this.mapSize) / 2 - this.mapSize / 4,
           (Math.random() * this.mapSize) / 2 - this.mapSize / 4,
