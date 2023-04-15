@@ -18,6 +18,7 @@ Some of the rules could be simillar to a rpg game.
 
 ## TODO
 
+- make fps display
 - make children
 - rework lifespan
 - make everything happen on a sphere

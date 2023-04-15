@@ -1,9 +1,11 @@
+//TODO: there are several update functions in different classes
+// TODO: every action should cost hp also - and regeneration should be lessened by aging gene
+
 import * as THREE from "three";
-import { BufferGeometry, Vector3 } from "three";
+import { Vector3 } from "three";
 import { Brain } from "../ml/brain";
 import { Eye } from "./eye";
 import { Genome } from "./genome";
-import { MaxAttributes } from "../consts/maxAttributes";
 import { Entity, EntityType } from "./entity";
 import { Neuron } from "../ml/neuron";
 import { firstNames, lastNames } from "../consts/names";
@@ -38,12 +40,12 @@ export class OrganismAttributes {
 }
 
 export class Organism extends Entity {
+  public name: string = "";
   public rotation: number;
   public acceleration: number;
+  public hp: number;
   public speed: THREE.Vector3;
   public brain: Brain;
-
-  public name: string = "";
 
   public isDead: boolean = true;
   public timeAlive = 0;
@@ -51,10 +53,9 @@ export class Organism extends Entity {
   public genome: Genome;
 
   public isReadytoMultiply = false;
-  public isAggresive = false;
-  public hp: number;
+  public isAggresive = false; // obsolete
 
-  public brainThreshold: number = 20;
+  public brainThreshold: number = 20; // TODO: move to attributes
   public brainTick = 0;
 
   public attributes: OrganismAttributes = new OrganismAttributes();
@@ -75,6 +76,7 @@ export class Organism extends Entity {
       this.genome = genome;
       this.setOrganismType(genome);
     }
+
     this.mesh = Appearance.createAppearance(
       this.genome,
       this.type,
@@ -84,7 +86,8 @@ export class Organism extends Entity {
     );
 
     AttributesUtils.getAttributesBasedOnGenome(this); // It should only affect attributes tho
-    this.mesh.scale.set(1, 1, 1);
+    this.mesh.scale.set(1, 1, 1); // scale should be calculated based on (age / multiplyAge)
+
     this.geometry = this.mesh?.geometry;
     this.material = this.mesh?.material;
 
@@ -113,8 +116,8 @@ export class Organism extends Entity {
   }
 
   private setOrganismType(genome: Genome): void {
-    const x = genome.words[7]; // x
-    const y = genome.words[13]; // y
+    const x = this.attributes.nameX; // x
+    const y = this.attributes.nameY; // y
     const k = Math.pow(Math.E, x) - x - 1;
     const l = Math.pow(Math.E, x) - 0.2 * x - 1;
     const m = Math.pow(Math.E, x) - 1 + 2 * Math.pow(x, 2);
@@ -146,14 +149,14 @@ export class Organism extends Entity {
       0
     );
     this.speed.add(acc);
-    this.speed.multiply(new Vector3(0.9, 0.9, 0.9));
+    this.speed.multiply(new Vector3(0.9, 0.9, 0.9)); // slow down should change based on terrain
   }
 
   private updateAcceleration(): void {
     if (this.acceleration >= 0.01) {
       this.acceleration = 0;
     } else {
-      this.acceleration *= 0.9;
+      this.acceleration *= 0.9; // slow down should change based on terrain
     }
   }
 
@@ -184,6 +187,7 @@ export class Organism extends Entity {
       }
     }
   }
+
   public update(): void {
     if (this.energy <= 0) {
       this.kill(
@@ -228,6 +232,7 @@ export class Organism extends Entity {
   }
 
   private updateMultiplyingRediness() {
+    // x should be defined by some genetic factor
     let x = 0.99;
     this.type !== EntityType.A ? (x = 0.99) : (x = 0.998);
     if (
@@ -251,7 +256,6 @@ export class Organism extends Entity {
     let phi = Math.PI * 2 * Math.random();
     // this.type !== EntityType.A ? (x = 3) : (x = Math.random() * 25);
 
-    //this is no random circle
     newOrganism.mesh.position.set(
       this.mesh.position.x + this.size * Math.cos(phi),
       this.mesh.position.y + this.size * Math.sin(phi),
@@ -269,6 +273,7 @@ export class Organism extends Entity {
   }
 
   public attack(): number {
+    // instead of dividing attack damage there should be an attack speed
     this.energy -= this.attributes.attack / 500;
     return this.attributes.attack;
   }

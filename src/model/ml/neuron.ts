@@ -1,3 +1,6 @@
+// Neuron could work on gpu
+import { MathFunctions } from "../utils/math";
+
 export class Neuron {
   weights: number[] = [];
   bias: number = 0;
@@ -14,10 +17,6 @@ export class Neuron {
       sum += input[i] * this.weights[i];
     }
     sum += this.bias;
-    this.value = this.sigmoid(sum);
-  }
-
-  sigmoid(x: number): number {
-    return 1 / (1 + Math.exp(-x));
+    this.value = MathFunctions.sigmoid(sum);
   }
 }

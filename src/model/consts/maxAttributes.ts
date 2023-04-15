@@ -1,3 +1,5 @@
+// Parameters shouldn't have the value of 1. They should work together with game rules.
+
 export class MaxAttributes {
   static BASE_ENERGY: number = 100;
   static MAX_ENERGY: number = 2000;

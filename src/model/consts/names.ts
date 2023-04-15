@@ -1,3 +1,5 @@
+// names should be different based on organism type
+
 export const firstNames: string[] = [
   "Zorzy",
   "Rzerzucho",

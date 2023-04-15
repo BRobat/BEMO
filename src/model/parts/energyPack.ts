@@ -1,3 +1,5 @@
+// Energy pack should have types
+
 import * as THREE from "three";
 import { Entity, EntityType } from "./entity";
 

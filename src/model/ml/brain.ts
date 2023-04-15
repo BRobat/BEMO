@@ -1,3 +1,5 @@
+// Brain should operate on gpu (I think). Or tensorflow applied maybe.
+
 import { Neuron } from "./neuron";
 
 export class Brain {

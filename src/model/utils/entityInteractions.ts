@@ -51,12 +51,6 @@ export class EntityInteractions {
     }
   }
 
-  static attack(o1: Organism, o2: Organism): void {
-    o1.speed = o1.speed.multiplyScalar(0.5);
-    o2.takeDamage(o1.attack());
-    o1.takeDamage(o2.attack() / 16);
-  }
-
   static interactionOrganismEnergyPack(o: Organism, e: EnergyPack): void {
     const energy = e as EnergyPack;
     o.addEnergy(energy.energy);
@@ -66,6 +60,12 @@ export class EntityInteractions {
   static interactionOrganismObstacle(o: Organism, obs: Obstacle): void {
     // push away from obstacle
     o.takeDamage(this.push(o, obs));
+  }
+
+  static attack(o1: Organism, o2: Organism): void {
+    o1.speed = o1.speed.multiplyScalar(0.5);
+    o2.takeDamage(o1.attack());
+    o1.takeDamage(o2.attack() / 16);
   }
 
   static push(e1: Organism, e2: Entity): number {
