@@ -1,3 +1,5 @@
+// TODO: Check if interactions can be made even when organism brain is slow
+
 import { Vector3, Triangle } from "three";
 import { Organism } from "../parts/organism";
 import { Entity, EntityType } from "../parts/entity";
@@ -17,7 +19,7 @@ export class Physics {
       if (
         !(e1 instanceof Organism) ||
         e1.isDead ||
-        (e1.type == EntityType.A && e1.timeAlive > 100)
+        (e1.type == EntityType.A && e1.timeAlive > 100) // it lets A make interactions for 100 ticks after its birth
       ) {
         return;
       }

@@ -1,3 +1,5 @@
+// shiet, appearance could be defined by attributes, not genes.
+
 import * as THREE from "three";
 import { Genome } from "../parts/genome";
 import { EntityType } from "../parts/entity";

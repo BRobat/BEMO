@@ -20,13 +20,14 @@ export class Eye {
     const pixel = this.determinePixel(angle);
     // TODO: check pixelSignal function
 
-    // deadpixel
+    // deadpixel - don't know exactly why deadpixel happens
     if (!pixel) {
       return;
     }
     let isNegativeNeutralPositive = 0;
 
     switch (ownType) {
+      // TODO: make mor switches!
       case EntityType.A:
         // nothing happens here
         break;
@@ -78,14 +79,11 @@ export class Eye {
     }
 
     if (isNegativeNeutralPositive === 1) {
-      // pixel.value += (1 / distance) * this.alertness;
-      // pixel.negativeSignal += 0.1;
+      // TODO: revise
     } else if (isNegativeNeutralPositive === 0) {
       pixel.value -= (1 / distance) * this.alertness;
-      // pixel.neutralSignal += 0.1;
     } else {
       pixel.value += (1 / distance) * this.alertness;
-      // pixel.positiveSignal += 0.1;
     }
     if (pixel.value > 1) {
       pixel.value = 1;

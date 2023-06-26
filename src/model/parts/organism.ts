@@ -1,13 +1,16 @@
+//TODO: there are several update functions in different classes
+// TODO: every action should cost hp also - and regeneration should be lessened by aging gene
+
 import * as THREE from "three";
-import { BufferGeometry, Vector3 } from "three";
+import { Vector3 } from "three";
 import { Brain } from "../ml/brain";
 import { Eye } from "./eye";
 import { Genome } from "./genome";
-import { MaxAttributes } from "../consts/maxAttributes";
 import { Entity, EntityType } from "./entity";
 import { Neuron } from "../ml/neuron";
 import { firstNames, lastNames } from "../consts/names";
 import { Appearance } from "../utils/appearance";
+import { AttributesUtils } from "../utils/attributes";
 
 export class OrganismAttributes {
   public speedMultiplier: number;
@@ -17,7 +20,6 @@ export class OrganismAttributes {
   public baseEnergy: number;
   public eyeSight: number;
   public brainSize: number;
-  public lifespan: number;
   public moveDrain: number;
   public energyDrain: number;
   public energyGain: number;
@@ -28,16 +30,22 @@ export class OrganismAttributes {
   public attack: number;
   public defense: number;
   public brainSpeed: number;
-  public aggresiveness: number;
+  public size: number;
+  public mass: number;
+  public aging: number;
+  public organismTypeX: number;
+  public organismTypeY: number;
+  public nameX: number;
+  public nameY: number;
 }
 
 export class Organism extends Entity {
+  public name: string = "";
   public rotation: number;
   public acceleration: number;
+  public hp: number;
   public speed: THREE.Vector3;
   public brain: Brain;
-
-  public name: string = "";
 
   public isDead: boolean = true;
   public timeAlive = 0;
@@ -45,10 +53,9 @@ export class Organism extends Entity {
   public genome: Genome;
 
   public isReadytoMultiply = false;
-  public isAggresive = false;
-  public hp: number;
+  public isAggresive = false; // obsolete
 
-  public brainThreshold: number = 20;
+  public brainThreshold: number = 20; // TODO: move to attributes
   public brainTick = 0;
 
   public attributes: OrganismAttributes = new OrganismAttributes();
@@ -65,35 +72,27 @@ export class Organism extends Entity {
       this.brain = brain;
       this.attributes.brainSize = brain.hidden.length;
     }
-    this.initByGenome(genome);
-    this.mesh = new THREE.Mesh(this.geometry, this.material);
-    this.uuid = this.mesh.uuid;
-  }
+    if (genome) {
+      this.genome = genome;
+      this.setOrganismType(genome);
+    }
 
-  private initByGenome(genome: Genome): void {
-    // TODO: colors and appearance should be moved to separate class - also change how material is created to show different genes
-    this.genome = genome;
-    this.setOrganismType(genome);
     this.mesh = Appearance.createAppearance(
-      genome,
+      this.genome,
       this.type,
       this.mesh,
       this.geometry,
       this.material
     );
-    this.mesh.scale.set(1, 1, 1);
+
+    AttributesUtils.getAttributesBasedOnGenome(this); // It should only affect attributes tho
+    this.mesh.scale.set(1, 1, 1); // scale should be calculated based on (age / multiplyAge)
+
     this.geometry = this.mesh?.geometry;
     this.material = this.mesh?.material;
 
-    this.name =
-      firstNames[Math.floor(genome.words[14] * firstNames.length)] +
-      lastNames[Math.floor(genome.words[15] * lastNames.length)];
-
-    // TODO: rules could be moved to separate class
-
-    this.size = genome.words[6] * 0.3 + 0.1;
-    this.mass = genome.words[6] * 100;
-    if (this.type === EntityType.A) this.mass += 100;
+    this.rotation = Math.random() * Math.PI * 2;
+    this.acceleration = 0.0;
 
     if (this.type === EntityType.A) {
       this.speed = new THREE.Vector3(
@@ -105,64 +104,20 @@ export class Organism extends Entity {
       this.speed = new THREE.Vector3(0.001, 0, 0);
     }
 
-    this.rotation = Math.random() * Math.PI * 2;
-    this.acceleration = 0.0;
-
-    this.attributes.maxHP = genome.words[9] * MaxAttributes.MAX_HEALTH;
-    this.hp = this.attributes.maxHP;
-    this.attributes.regeneration =
-      genome.words[10] * MaxAttributes.REGENERATION;
-    this.attributes.attack = genome.words[11] * MaxAttributes.ATTACK;
-    this.attributes.defense = genome.words[12] * MaxAttributes.DEFENSE;
-
-    this.attributes.brainSpeed = genome.words[13] * MaxAttributes.BRAIN_SPEED;
-
-    this.attributes.energyGain = genome.words[7] * MaxAttributes.ENERGY_GAIN;
-
-    this.attributes.baseEnergy = genome.words[0] * MaxAttributes.BASE_ENERGY;
-    this.attributes.lifespan = genome.words[1] * MaxAttributes.LIFESPAN;
-    this.attributes.maxEnergy = genome.words[6] * MaxAttributes.MAX_ENERGY;
-
-    this.attributes.speedMultiplier =
-      (genome.words[2] *
-        MaxAttributes.SPEED_MULTIPLIER *
-        Math.pow(1 - genome.words[7], 2)) /
-      this.attributes.maxHP;
-
-    this.attributes.moveDrain =
-      genome.words[2] * MaxAttributes.SPEED_MULTIPLIER +
-      genome.words[7] +
-      this.attributes.maxEnergy +
-      this.attributes.defense +
-      this.attributes.maxHP;
-
-    this.attributes.rotationMultiplier =
-      genome.words[3] *
-      MaxAttributes.ROTATION_MULTIPLIER *
-      Math.pow(1 - genome.words[7], 2);
-
-    this.attributes.eyeSight = genome.words[4] * MaxAttributes.EYE_SIGHT;
-
-    this.attributes.multiplyAge = genome.words[5] * MaxAttributes.MULTIPLY_AGE;
-
-    this.attributes.energyDrain =
-      (this.attributes.brainSize +
-        this.attributes.eyeSight +
-        this.attributes.defense) *
-      0.001;
-
-    this.attributes.fieldOfView = Math.PI; // unused
-
-    this.energy = this.attributes.baseEnergy;
-
-    this.attributes.alertness = genome.words[8] * MaxAttributes.ALERTNESS;
+    if (this.type === EntityType.A) this.mass += 100;
 
     this.eyes = new Eye(Math.PI * 2, 9, this.attributes.alertness);
+    this.energy = this.attributes.baseEnergy;
+
+    this.size = this.attributes.size;
+
+    this.mesh = new THREE.Mesh(this.geometry, this.material);
+    this.uuid = this.mesh.uuid;
   }
 
   private setOrganismType(genome: Genome): void {
-    const x = genome.words[7]; // x
-    const y = genome.words[13]; // y
+    const x = this.attributes.nameX; // x
+    const y = this.attributes.nameY; // y
     const k = Math.pow(Math.E, x) - x - 1;
     const l = Math.pow(Math.E, x) - 0.2 * x - 1;
     const m = Math.pow(Math.E, x) - 1 + 2 * Math.pow(x, 2);
@@ -194,14 +149,14 @@ export class Organism extends Entity {
       0
     );
     this.speed.add(acc);
-    this.speed.multiply(new Vector3(0.9, 0.9, 0.9));
+    this.speed.multiply(new Vector3(0.9, 0.9, 0.9)); // slow down should change based on terrain
   }
 
   private updateAcceleration(): void {
     if (this.acceleration >= 0.01) {
       this.acceleration = 0;
     } else {
-      this.acceleration *= 0.9;
+      this.acceleration *= 0.9; // slow down should change based on terrain
     }
   }
 
@@ -232,6 +187,7 @@ export class Organism extends Entity {
       }
     }
   }
+
   public update(): void {
     if (this.energy <= 0) {
       this.kill(
@@ -248,16 +204,6 @@ export class Organism extends Entity {
           " making: " +
           this.children +
           " offspring"
-      );
-    } else if (this.timeAlive > this.attributes.lifespan) {
-      this.kill(
-        "died of old age: " +
-          this.timeAlive +
-          " making: " +
-          this.children +
-          " offspring" +
-          " with energy:" +
-          this.energy
       );
     }
 
@@ -286,6 +232,7 @@ export class Organism extends Entity {
   }
 
   private updateMultiplyingRediness() {
+    // x should be defined by some genetic factor
     let x = 0.99;
     this.type !== EntityType.A ? (x = 0.99) : (x = 0.998);
     if (
@@ -309,7 +256,6 @@ export class Organism extends Entity {
     let phi = Math.PI * 2 * Math.random();
     // this.type !== EntityType.A ? (x = 3) : (x = Math.random() * 25);
 
-    //this is no random circle
     newOrganism.mesh.position.set(
       this.mesh.position.x + this.size * Math.cos(phi),
       this.mesh.position.y + this.size * Math.sin(phi),
@@ -327,6 +273,7 @@ export class Organism extends Entity {
   }
 
   public attack(): number {
+    // instead of dividing attack damage there should be an attack speed
     this.energy -= this.attributes.attack / 500;
     return this.attributes.attack;
   }
@@ -370,7 +317,7 @@ export class Organism extends Entity {
     this.rotation = org.rotation;
     this.brain = org.brain;
     this.genome = org.genome;
-    this.initByGenome(org.genome);
+    // this.initByGenome(org.genome); // probably used for mutation
     this.timeAlive = 0;
     this.isDead = false;
     this.children = 0;

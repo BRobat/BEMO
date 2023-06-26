@@ -17,7 +17,7 @@ export class Data {
   public brains: Brain[] = [];
   public bestScore: number = 0;
 
-  public batchSize: number = 4000;
+  public batchSize: number = 3000;
   public obstacleBatch: number = 500;
 
   public aliveOrganisms: number = 0;
@@ -48,6 +48,7 @@ export class Data {
   }
 
   public updateOrganisms() {
+    // TODO update organisms is here and inside organism class itself
     this.feedPlants();
     this.teleportOrganisms();
     this.hashEntities();
@@ -167,6 +168,7 @@ export class Data {
   }
 
   private initObstacles() {
+    // for now it's good - later to be removed when terrain is applied.
     this.obstacles = [];
     let lastPosition = new Vector3(0, 0, 0);
     let lastSize = 0;
@@ -291,7 +293,6 @@ export class Data {
         this.organisms[i].brain = new Brain(9, 6, 3);
         this.organisms[i].isDead = false;
         this.organisms[i].energy = 290;
-        this.organisms[i].attributes.lifespan = 500;
         this.organisms[i].mesh.position.set(
           (Math.random() * this.mapSize) / 2 - this.mapSize / 4,
           (Math.random() * this.mapSize) / 2 - this.mapSize / 4,
